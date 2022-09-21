@@ -42,16 +42,16 @@ module gbf_pe_array #(parameter ROW         = 16,   //PE array row size
     
     //actv_gbf, wgt_gbf
     wire wire_actv_en1b, wire_actv_en2b, wire_wgt_en1b, wire_wgt_en2b;
-    wire [GBF_ADDR_BITWIDTH-1:0] wire_actv_addr1b, wire_actv_addr2b, wire_wgt_addr1b, wire_wgt_addr2b;
+    wire [GBF_ADDR_BITWIDTH-1:0] wire_actv_addr1b, wire_wgt_addr1b;
     wire [GBF_DATA_BITWIDTH-1:0] wire_actv_r_data1b, wire_actv_r_data2b, wire_wgt_r_data1b, wire_wgt_r_data2b;
 
      gbf_db #(.DATA_BITWIDTH(GBF_DATA_BITWIDTH), .ADDR_BITWIDTH(GBF_ADDR_BITWIDTH), .DEPTH(GBF_DEPTH), .MEM_INIT_FILE1("gbf_actv_buf1.mem"), .MEM_INIT_FILE2("gbf_actv_buf2.mem")
      ) actv_global_buffer(.clk(clk), .en1a(actv_en1a), .en1b(wire_actv_en1b), .we1a(actv_we1a), .en2a(actv_en2a), .en2b(wire_actv_en2b), .we2a(actv_we2a), .addr1a(actv_addr1a),
-     .addr1b(wire_actv_addr1b), .addr2a(actv_addr2a), .addr2b(wire_actv_addr2b), .w_data1a(actv_w_data1a), .w_data2a(wgt_w_data2a), .r_data1b(wire_actv_r_data1b), .r_data2b(wire_actv_r_data2b));
+     .addr1b(wire_actv_addr1b), .addr2a(actv_addr2a), .addr2b(wire_actv_addr1b), .w_data1a(actv_w_data1a), .w_data2a(wgt_w_data2a), .r_data1b(wire_actv_r_data1b), .r_data2b(wire_actv_r_data2b));
 
      gbf_db #(.DATA_BITWIDTH(GBF_DATA_BITWIDTH), .ADDR_BITWIDTH(GBF_ADDR_BITWIDTH), .DEPTH(GBF_DEPTH), .MEM_INIT_FILE1("gbf_wgt_buf1.mem"), .MEM_INIT_FILE2("gbf_wgt_buf2.mem")
      ) wgt_global_buffer(.clk(clk), .en1a(wgt_en1a), .en1b(wire_wgt_en1b), .we1a(wgt_we1a), .en2a(wgt_en2a), .en2b(wire_wgt_en2b), .we2a(wgt_we2a), .addr1a(wgt_addr1a),
-     .addr1b(wire_wgt_addr1b), .addr2a(wgt_addr2a), .addr2b(wire_wgt_addr2b), .w_data1a(wgt_w_data1a), .w_data2a(wgt_w_data2a), .r_data1b(wire_wgt_r_data1b), .r_data2b(wire_wgt_r_data2b));
+     .addr1b(wire_wgt_addr1b), .addr2a(wgt_addr2a), .addr2b(wire_wgt_addr1b), .w_data1a(wgt_w_data1a), .w_data2a(wgt_w_data2a), .r_data1b(wire_wgt_r_data1b), .r_data2b(wire_wgt_r_data2b));
 
     //gbf_controller
     wire wire_actv_rf1_need_data, wire_actv_rf2_need_data, wire_wgt_rf1_need_data, wire_wgt_rf2_need_data;

@@ -90,11 +90,14 @@ module gbf_pe_array_tb();
         $display($time, " [pe_array] wire_actv_rf1_need_data : %h", u_gbf_pe_array.wire_actv_rf1_need_data);
         $display($time, " [pe_array] wire_actv_rf2_need_data : %h", u_gbf_pe_array.wire_actv_rf2_need_data);
 
-        for(i=0; i<120; i=i+1) begin
+        for(i=0; i<300; i=i+1) begin
             #5
             $display($time, " [gbf_controller] wgt_en1b : %h", u_gbf_pe_array.wire_wgt_en1b);
             $display($time, " [gbf_controller] wgt_addr1b : %h", u_gbf_pe_array.wire_wgt_addr1b);
             $display($time, " [gbf_controller] wgt_r_data1b : %h", u_gbf_pe_array.wire_wgt_r_data1b);
+            $display($time, " [gbf_controller] wgt_r_data2b: %h", u_gbf_pe_array.wire_wgt_r_data2b);
+            $display($time, " [gbf_controller] wire_wgt_mux_gbf2rf : %h", u_gbf_pe_array.wire_wgt_mux_gbf2rf);
+            $display($time, " [gbf_controller] wire_wgt_data : %h", u_gbf_pe_array.wire_wgt_data);
             $display($time, " [en_BRAM] wire_wgt_en : %h", u_gbf_pe_array.wire_wgt_en);
             $display($time, " [mux32_BRAM] wire_wgt_mux32_addr : %h", u_gbf_pe_array.wire_wgt_mux32_addr);
             $display($time, " [mux32_BRAM] wire_wgt_mux32_dob : %h", u_gbf_pe_array.wire_wgt_mux32_dob);
@@ -107,6 +110,9 @@ module gbf_pe_array_tb();
             $display($time, " [gbf_controller] actv_en1b : %h", u_gbf_pe_array.wire_actv_en1b);
             $display($time, " [gbf_controller] actv_addr1b : %h", u_gbf_pe_array.wire_actv_addr1b);
             $display($time, " [gbf_controller] actv_r_data1b : %h", u_gbf_pe_array.wire_actv_r_data1b);
+            $display($time, " [gbf_controller] actv_r_data2b: %h", u_gbf_pe_array.wire_actv_r_data2b);
+            $display($time, " [gbf_controller] wire_actv_mux_gbf2rf : %h", u_gbf_pe_array.wire_actv_mux_gbf2rf);
+            $display($time, " [gbf_controller] wire_actv_data : %h", u_gbf_pe_array.wire_actv_data);
             $display($time, " [en_BRAM] wire_actv_en : %h", u_gbf_pe_array.wire_actv_en);
             $display($time, " [mux32_BRAM] wire_actv_mux32_addr : %h", u_gbf_pe_array.wire_actv_mux32_addr);
             $display($time, " [mux32_BRAM] wire_actv_mux32_dob : %h", u_gbf_pe_array.wire_actv_mux32_dob);
