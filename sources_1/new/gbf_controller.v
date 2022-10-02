@@ -1,5 +1,5 @@
 //------------------------------------------------------------+
-// Project: Spatial Accelerator
+// Project: Programmable Accelerator
 // Module: gbf_controller
 // Description:
 //		gbf_controller which generate read-address and enable signal for actv/wgt global buffer.

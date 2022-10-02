@@ -1,5 +1,5 @@
 //------------------------------------------------------------+
-// Project: Spatial Accelerator
+// Project: Programmable Accelerator
 // Module: mux2
 // Description:
 //		mux2

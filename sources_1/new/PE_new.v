@@ -1,5 +1,5 @@
 //------------------------------------------------------------+
-// Project: Spatial Accelerator
+// Project: Programmable Accelerator
 // Module: PE_new
 // Description:
 //		PE_new add psum_write_addr to support seperation of relation between read_addr and write_addr of psum on MAC

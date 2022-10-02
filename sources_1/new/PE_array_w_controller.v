@@ -1,5 +1,5 @@
 //------------------------------------------------------------+
-// Project: Spatial Accelerator
+// Project: Programmable Accelerator
 // Module: pe_array_w_controller
 // Description:
 //		PE array + PE array controller

@@ -1,5 +1,5 @@
 //------------------------------------------------------------+
-// Project: Spatial Accelerator
+// Project: Programmable Accelerator
 // Module: rf_psum_sync_dpdb_new
 // Description:
 //		Synchronized Dual-Port Double-Buffer RF for Psum
@@ -37,9 +37,6 @@ module rf_psum_sync_dpdb_new #( parameter DATA_BITWIDTH = 16,
 	always@(posedge clk ,posedge reset) 
 		begin : BUFFER1
 			if(reset) begin
-				for (i=0; i<DEPTH; i=i+1) begin
-					mem1[i] <= 0;
-				end
                 out1 <= 0;
 				r_data1 <= 0;
 				init1 <= 1;
@@ -69,9 +66,6 @@ module rf_psum_sync_dpdb_new #( parameter DATA_BITWIDTH = 16,
 	always@(posedge clk or posedge reset)
 		begin : BUFFER2
 			if(reset) begin
-				for (i=0; i<DEPTH; i=i+1) begin
-					mem2[i] <= 0;
-				end
                 out2 <= 0;
 				r_data2 <= 0;
 				init2 <=1;

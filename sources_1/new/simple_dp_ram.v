@@ -1,5 +1,5 @@
 //------------------------------------------------------------+
-// Project: Spatial Accelerator
+// Project: Programmable Accelerator
 // Module: simple_dp_ram
 // Description:
 //		Simple Dual-port RAM(with ena, enb pin) wrapper (N_DELAY = 1. Bandwidth = 512bits/cycle)
@@ -83,7 +83,13 @@ module simple_dp_ram #(parameter DATA_BITWIDTH    = 256,
 				.dina(dia), .doutb(dob)
 			);
         end
-
+        else if((DATA_BITWIDTH==256) && (DEPTH==4) && (MEM_INIT_FILE=="A_adder_mode.mem"))begin : gen_A_adder_mode
+            A_adder_mode_BRAM u_A_adder_mode_BRAM( //it need posedge output
+				.clka(clk), .clkb(clk), .ena(ena), .enb(enb), .wea(wea),
+				.addra(addra), .addrb(addrb),
+				.dina(dia), .doutb(dob)
+			);
+        end
 	    endgenerate
     
     `else 

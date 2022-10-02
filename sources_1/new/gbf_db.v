@@ -1,5 +1,5 @@
 //------------------------------------------------------------+
-// Project: Spatial Accelerator
+// Project: Programmable Accelerator
 // Module: gbf_db
 // Description:
 //		Global Buffer Module for Activation and Weight

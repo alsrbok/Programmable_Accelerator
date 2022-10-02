@@ -1,0 +1,4 @@
+Memory_Initialization_Radix = 16;
+Memory_Initialization_Vector =
+a8ffa8ffa8ffa8ffa8ffa8ffa8ffa8ffa8ffa8ffa8ffa8ffa8ffa8ffa8ffa8ff,
+fdabfdabfdabfdabfdabfdabfdabfdabfdabfdabfdabfdabfdabfdabfdabfdab;

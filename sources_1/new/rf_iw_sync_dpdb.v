@@ -1,5 +1,5 @@
 //------------------------------------------------------------+
-// Project: Spatial Accelerator
+// Project: Programmable Accelerator
 // Module: rf_iw_sync_dpdb
 // Description:
 //		Synchronized Dual-Port Double-Buffer RF for Activation and Weight

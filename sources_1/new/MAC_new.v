@@ -1,5 +1,5 @@
 //------------------------------------------------------------+
-// Project: Spatial Accelerator
+// Project: Programmable Accelerator
 // Module: MAC_new
 // Description:
 //		MAC_new support seperation of write_addr and sum_in location.

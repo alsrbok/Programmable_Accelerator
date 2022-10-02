@@ -1,5 +1,5 @@
 //------------------------------------------------------------+
-// Project: Spatial Accelerator
+// Project: Programmable Accelerator
 // Module: pe_array_controller
 // Description:
 //		It is a pe_array_controller which generate addr and en/we signal    
@@ -68,7 +68,7 @@ module pe_array_controller #(parameter ROW         = 16,   //PE array row size
     end
 
     
-    parameter [2:0]
+    localparam [2:0]
         IDLE        =  3'b000,  // Initially begin to compute new layer (nothing happen to pe array)
         S1          =  3'b001,  // actv/wgt_rf buffer1 get data from actv/wgt_gbf buffer1
         S2          =  3'b010,  // actv/wgt/psum_rf buffer1 are used in MAC operation , actv/wgt_rf buffer2 get data from actv/wgt_gbf(** If gbf send data..)
@@ -111,109 +111,92 @@ module pe_array_controller #(parameter ROW         = 16,   //PE array row size
             IDLE:
                 if(actv_data_avail || wgt_data_avail) begin
                     $display("%0t ns pe_array_controller's nxt stage is setting to S1 from IDLE", $time);
-                    nxt_state = S1;
+                    nxt_state <= S1;
                 end
                 else   
-                    nxt_state = IDLE;
+                    nxt_state <= IDLE;
             S1:
                 if(actv_buf1_send_finish && wgt_buf1_send_finish) begin
                     $display("%0t ns pe_array_controller's nxt stage is setting to S2 from S1", $time);
-                    nxt_state = S2;
+                    nxt_state <= S2;
                 end
                 else
-                    nxt_state = S1;
+                    nxt_state <= S1;
             S2:
             begin
                 if(actv_flag==1'b0 && wgt_flag==1'b0 && psum_flag==1'b0) begin
-                    nxt_state = S2;
+                    nxt_state <= S2;
                 end
                 else if((actv_flag==1'b1 && actv_buf2_send_finish==1'b0) || (wgt_flag==1'b1 && wgt_buf2_send_finish==1'b0) || (psum_flag==1'b1 && su_add_finish==1'b0)) begin
                     $display("%0t ns pe_array_controller's nxt stage is setting to WAIT from S2 ", $time);
-                    nxt_state = WAIT;
+                    nxt_state <= WAIT;
                 end
                 else if((!actv_flag || actv_buf2_send_finish) && (!wgt_flag || wgt_buf2_send_finish) && (!psum_flag || su_add_finish)) begin
                     $display("%0t ns pe_array_controller's nxt stage is setting to init S3 from S2", $time);
                     $display("%0t ns pe_array_controller: actv_flag /actv_buf1_send_finish /actv_buf2_send_finish /wgt_flag /wgt_buf1_send_finish /wgt_buf2_send_finish /psum_flag /su_add_finish : %d /%d /%d /%d /%d /%d /%d /%d ", $time,actv_flag ,actv_buf1_send_finish ,actv_buf2_send_finish ,wgt_flag ,wgt_buf1_send_finish ,wgt_buf2_send_finish ,psum_flag ,su_add_finish);
-                    nxt_state = init_S3;
+                    nxt_state <= init_S3;
                 end
                 else begin
-                    nxt_state = S2;
+                    nxt_state <= S2;
                 end
-            /*
-                if((actv_flag && actv_send_finish) || (wgt_flag && wgt_send_finish) || (psum_flag && su_add_finish)) begin
-                    nxt_state = init_S3;
-                end
-                else if(actv_flag || wgt_flag || psum_flag)
-                    nxt_state = WAIT;
-                else
-                    nxt_state = S2;
-            */
             end
             WAIT:
             begin
                 if((!actv_flag || (actv_rf1_need_data && actv_buf1_send_finish) || (actv_rf2_need_data && actv_buf2_send_finish)) && (!wgt_flag || (wgt_rf1_need_data && wgt_buf1_send_finish) || (wgt_rf2_need_data && wgt_buf2_send_finish)) && (!psum_flag || su_add_finish)) begin
                     $display("%0t ns pe_array_controller's nxt stage is setting to init S3 from WAIT", $time);
                     $display("%0t ns pe_array_controller: actv_flag /actv_buf1_send_finish /actv_buf2_send_finish /wgt_flag /wgt_buf1_send_finish /wgt_buf2_send_finish /psum_flag /su_add_finish : %d /%d /%d /%d /%d /%d /%d /%d ", $time,actv_flag ,actv_buf1_send_finish ,actv_buf2_send_finish ,wgt_flag ,wgt_buf1_send_finish ,wgt_buf2_send_finish ,psum_flag ,su_add_finish);
-                    nxt_state = init_S3;
+                    nxt_state <= init_S3;
                 end
                 else begin
                     $display("%0t ns pe_array_controller's nxt stage is setting to WAIT from WAIT", $time);
                     $display("%0t ns pe_array_controller: actv_flag /actv_buf1_send_finish /actv_buf2_send_finish /wgt_flag /wgt_buf1_send_finish /wgt_buf2_send_finish /psum_flag /su_add_finish : %d /%d /%d /%d /%d /%d /%d /%d ", $time,actv_flag ,actv_buf1_send_finish ,actv_buf2_send_finish ,wgt_flag ,wgt_buf1_send_finish ,wgt_buf2_send_finish ,psum_flag ,su_add_finish);  
-                    nxt_state = WAIT;
+                    nxt_state <= WAIT;
                 end
             end
             init_S3:
                 if(finish)
-                    nxt_state = FINISH;
+                    nxt_state <= FINISH;
                 else begin
                     $display("%0t ns pe_array_controller's nxt stage is setting to delay S3 from init_S3", $time);
-                    nxt_state = delay_S3;
+                    nxt_state <= delay_S3;
                 end
             delay_S3:
                 if(finish)
-                    nxt_state = FINISH;
+                    nxt_state <= FINISH;
                 else
-                    nxt_state = S3;
+                    nxt_state <= S3;
             S3:
                 if(finish)
-                    nxt_state = FINISH;
+                    nxt_state <= FINISH;
                 else begin
                     if(~actv_flag && ~wgt_flag && ~psum_flag) begin
-                        nxt_state = S3;
+                        nxt_state <= S3;
                     end
                     else if((actv_flag && ((actv_rf1_need_data && ~actv_buf1_send_finish) || (actv_rf2_need_data && ~actv_buf2_send_finish))) || (wgt_flag && ((wgt_rf1_need_data && ~wgt_buf1_send_finish) || (wgt_rf2_need_data && ~wgt_buf2_send_finish))) || (psum_flag && ~su_add_finish)) begin
                         $display("%0t ns pe_array_controller's nxt stage is setting to WAIT from S3 ", $time);
                         $display("%0t ns pe_array_controller: actv_flag /actv_buf1_send_finish /actv_buf2_send_finish /wgt_flag /wgt_buf1_send_finish /wgt_buf2_send_finish /psum_flag /su_add_finish : %d /%d /%d /%d /%d /%d /%d /%d ", $time,actv_flag ,actv_buf1_send_finish ,actv_buf2_send_finish ,wgt_flag ,wgt_buf1_send_finish ,wgt_buf2_send_finish ,psum_flag ,su_add_finish);
                         $display("%0t ns pe_array_controller: actv_rf1_need_data / actv_rf2_need_data / wgt_rf1_need_data / wgt_rf2_need_data : %d / %d / %d / $d", $time, actv_rf1_need_data ,actv_rf2_need_data, wgt_rf1_need_data, wgt_rf2_need_data);
-                        nxt_state = WAIT;
+                        nxt_state <= WAIT;
                     end
                     else if((!actv_flag || (actv_rf1_need_data && actv_buf1_send_finish) || (actv_rf2_need_data && actv_buf2_send_finish)) && (!wgt_flag || (wgt_rf1_need_data && wgt_buf1_send_finish) || (wgt_rf2_need_data && wgt_buf2_send_finish)) && (!psum_flag || su_add_finish)) begin
                         $display("%0t ns pe_array_controller's nxt stage is setting to init S3 from 32", $time);
                         $display("%0t ns pe_array_controller: actv_flag /actv_buf1_send_finish /actv_buf2_send_finish /wgt_flag /wgt_buf1_send_finish /wgt_buf2_send_finish /psum_flag /su_add_finish : %d /%d /%d /%d /%d /%d /%d /%d ", $time,actv_flag ,actv_buf1_send_finish ,actv_buf2_send_finish ,wgt_flag ,wgt_buf1_send_finish ,wgt_buf2_send_finish ,psum_flag ,su_add_finish);
-                        nxt_state = init_S3;
+                        nxt_state <= init_S3;
                     end
                     else
-                        nxt_state = S3;
+                        nxt_state <= S3;
                 end
             FINISH:
-                nxt_state =FINISH;
+                nxt_state <= FINISH;
             default:
-                nxt_state = IDLE;
+                nxt_state <= IDLE;
         endcase
     end
 
+    reg check_flag[0:2];
+
     // at each state, send output on the negedge clk.
-    always @(negedge clk, posedge reset) begin
-        if(reset) begin // same with IDLE
-            actv_rf1_need_data <= 1'b1; actv_rf2_need_data <= 1'b1; wgt_rf1_need_data <= 1'b1; wgt_rf2_need_data <= 1'b1;
-            pe_psum_finish <= 1'b0;
-            conv_finish <= 1'b0;
-            MAC_en <= {ROW*COL{1'b0}};
-            actv_sel <= 1'bx; actv_r_addr1 <= {ACTV_ADDR_BITWIDTH{1'bx}}; actv_r_addr2 <= {ACTV_ADDR_BITWIDTH{1'bx}};
-            wgt_sel <= 1'bx; wgt_r_addr1 <= {WGT_ADDR_BITWIDTH{1'bx}}; wgt_r_addr2 <= {WGT_ADDR_BITWIDTH{1'bx}};
-            psum_en <= 1'bx; psum_addr1 <= {PSUM_ADDR_BITWIDTH{1'bx}}; psum_addr2 <= {PSUM_ADDR_BITWIDTH{1'bx}}; psum_write_addr <= {PSUM_ADDR_BITWIDTH{1'bx}};
-        end
-        else begin
+    always @(negedge clk) begin
             case(nxt_state) //due to non-blocking assignmet
                 IDLE:
                 begin
@@ -230,6 +213,8 @@ module pe_array_controller #(parameter ROW         = 16,   //PE array row size
                 begin
                     $display("%0t ns pe_array_controller's nxt state: S1 ", $time);
                     actv_rf1_need_data <= 1'b1; actv_rf2_need_data <= 1'b1; wgt_rf1_need_data <= 1'b1; wgt_rf2_need_data <= 1'b1;
+                    //if(actv_buf1_send_finish) begin actv_rf1_need_data <= 1'b0; end else begin actv_rf1_need_data <= 1'b1; end actv_rf2_need_data <= 1'b1; 
+                    //if(wgt_buf1_send_finish) begin wgt_rf1_need_data <= 1'b0; end else begin wgt_rf1_need_data <= 1'b1; end wgt_rf2_need_data <= 1'b1;
                     pe_psum_finish <= 1'b0;
                     conv_finish <= 1'b0;
                     MAC_en <= {ROW*COL{1'b0}};
@@ -259,38 +244,26 @@ module pe_array_controller #(parameter ROW         = 16,   //PE array row size
                 init_S3:    // just for change the signal. do not compute or increase the addr(cycle)
                 begin
                     $display("%0t ns pe_array_controller's nxt state: init_S3 ", $time);
-                    MAC_en = {ROW*COL{1'b0}};
+                    MAC_en <= {ROW*COL{1'b0}};
                     if(actv_flag && ((actv_rf1_need_data && actv_buf1_send_finish) || (actv_rf2_need_data && actv_buf2_send_finish))) begin
-                        $display("actv info changed ");
-                        actv_rf1_need_data = ~actv_rf1_need_data; actv_rf2_need_data = ~actv_rf2_need_data;
-                        actv_flag = 1'b0;
-                        actv_sel = ~actv_sel; cycle[0] = {bits_for_cycle{1'b0}};
+                        $display("actv info changed at negedge");
+                        check_flag[0] <= 1'b1;
+                        actv_rf1_need_data <= ~actv_rf1_need_data; actv_rf2_need_data <= ~actv_rf2_need_data;
+                        actv_sel <= ~actv_sel;
                     end
-                    else begin
-                        $display("actv value is decreased ");
-                        cycle[0] = cycle[0]-1; 
-                    end
-
                     if(wgt_flag && ((wgt_rf1_need_data && wgt_buf1_send_finish) || (wgt_rf2_need_data && wgt_buf2_send_finish))) begin
-                        $display("wgt info changed ");
-                        wgt_rf1_need_data = ~wgt_rf1_need_data; wgt_rf2_need_data = ~wgt_rf2_need_data;
-                        wgt_flag = 1'b0;
-                        wgt_sel = ~ wgt_sel; cycle[1] = {bits_for_cycle{1'b0}};
-                    end
-                    else begin
-                        cycle[1] = cycle[1]-1; 
+                        $display("wgt info changed at negedge");
+                        check_flag[1] <= 1'b1;
+                        wgt_rf1_need_data <= ~wgt_rf1_need_data; wgt_rf2_need_data <= ~wgt_rf2_need_data;
+                        wgt_sel <= ~ wgt_sel;
                     end
 
                     if(psum_flag && su_add_finish) begin
-                        $display("psum info changed ");
-                        pe_psum_finish = 1'b1;
-                        psum_flag = 1'b0;
-                        psum_en = ~psum_en; cycle[2] = {bits_for_cycle{1'b0}};
-                        psum_write_addr = psum_tm_addr[cycle[2]];
-                    end
-                    else begin
-                        $display("psum value is decreased ");
-                        cycle[2] = cycle[2]-1; 
+                        $display("psum info changed at negedge");
+                        check_flag[2] <= 1'b1;
+                        pe_psum_finish <= 1'b1;
+                        psum_en <= ~psum_en;
+                        psum_write_addr <= psum_tm_addr[cycle[2]];
                     end
                     $display("%0t ns cycle[0], [1], [2]: %d / %d / %d ", $time, cycle[0], cycle[1], cycle[2]);
                 end
@@ -299,12 +272,7 @@ module pe_array_controller #(parameter ROW         = 16,   //PE array row size
                     $display("%0t ns pe_array_controller's nxt state: delay_S3 ", $time);
                     //MAC_en = su_en[0];
                     pe_psum_finish = 1'b0;
-                    if(cycle[0] != {bits_for_cycle{1'b0}})
-                        cycle[0] = cycle[0]-1; 
-                    if(cycle[1] != {bits_for_cycle{1'b0}})
-                        cycle[1] = cycle[1]-1; 
-                    if(cycle[2] != {bits_for_cycle{1'b0}})
-                        cycle[2] = cycle[2]-1; 
+                    check_flag[0] <= 1'b0; check_flag[1] <= 1'b0; check_flag[2] <= 1'b0;
                     if(actv_sel) begin actv_r_addr1 = {ACTV_ADDR_BITWIDTH{1'bx}}; actv_r_addr2 = actv_tm_addr[cycle[0]]; end
                     else begin actv_r_addr1 = actv_tm_addr[cycle[0]]; actv_r_addr2 = {ACTV_ADDR_BITWIDTH{1'bx}}; end
                     if(wgt_sel) begin wgt_r_addr1 = {WGT_ADDR_BITWIDTH{1'bx}}; wgt_r_addr2 = wgt_tm_addr[cycle[1]]; end
@@ -355,27 +323,20 @@ module pe_array_controller #(parameter ROW         = 16,   //PE array row size
                     psum_en <= 1'bx; psum_addr1 <= {PSUM_ADDR_BITWIDTH{1'bx}}; psum_addr2 <= {PSUM_ADDR_BITWIDTH{1'bx}}; psum_write_addr <= {PSUM_ADDR_BITWIDTH{1'bx}};
                 end
             endcase
-        end 
     end
 
 
     //at each state, update the cycle[0], cycle[1], cycle[2] and set flag reg at the end of the cycle on the negedge clk.
-    always @(posedge clk, posedge reset) begin
-        if(reset) begin
-            cycle[0] <= {bits_for_cycle{1'b0}}; cycle[1] <= {bits_for_cycle{1'b0}}; cycle[2] <= {bits_for_cycle{1'b0}};
-            actv_flag <= 1'b0; wgt_flag <= 1'b0; psum_flag <= 1'b0;
-            turn_off <= 1'b0;
-        end
-        else begin
+    always @(posedge clk) begin
             case(cur_state)
                 IDLE:
-                    ;
+                begin
+                    cycle[0] <= {bits_for_cycle{1'b0}}; cycle[1] <= {bits_for_cycle{1'b0}}; cycle[2] <= {bits_for_cycle{1'b0}};
+                    actv_flag <= 1'b0; wgt_flag <= 1'b0; psum_flag <= 1'b0;
+                    turn_off <= 1'b0;
+                end
                 S1:
                     ;
-                /*begin
-                    actv_flag = 1'b0; wgt_flag = 1'b0; psum_flag = 1'b0;
-                    turn_off = 1'b0;
-                end*/
                 S2:
                 begin
                     cycle[0] <= cycle[0]+1; cycle[1] <= cycle[1]+1; cycle[2] <= cycle[2]+1; 
@@ -385,15 +346,37 @@ module pe_array_controller #(parameter ROW         = 16,   //PE array row size
                 end 
                 WAIT:
                 begin
-                    cycle[0] = cycle[0]; cycle[1] = cycle[1]; cycle[2] = cycle[2]; 
+                    cycle[0] <= cycle[0]; cycle[1] <= cycle[1]; cycle[2] <= cycle[2]; 
+
                 end
                 init_S3: //init_S3 is just for setting a new value
                 begin
-                    turn_off = 1'b1;
+                    turn_off <= 1'b1;
+                    
+                    if(check_flag[0]) begin
+                        $display("actv info changed at posedge");
+                        actv_flag <= 1'b0; cycle[0] <= {bits_for_cycle{1'b0}};
+                    end
+                    if(check_flag[1]) begin
+                        $display("wgt info changed at posedge");
+                        wgt_flag <= 1'b0; cycle[1] <= {bits_for_cycle{1'b0}};
+                    end
+
+                    if(check_flag[2]) begin
+                        $display("psum info changed at posedge");
+                        psum_flag <= 1'b0; cycle[2] <= {bits_for_cycle{1'b0}};
+                    end
+                    $display("%0t ns cycle[0], [1], [2]: %d / %d / %d ", $time, cycle[0], cycle[1], cycle[2]);
                 end
                 delay_S3:
                 begin
-                    turn_off = 1'b0;
+                    if(cycle[0] != {bits_for_cycle{1'b0}})
+                        cycle[0] <= cycle[0]-2; 
+                    if(cycle[1] != {bits_for_cycle{1'b0}})
+                        cycle[1] <= cycle[1]-2; 
+                    if(cycle[2] != {bits_for_cycle{1'b0}})
+                        cycle[2] <= cycle[2]-2; 
+                    turn_off <= 1'b0;
                 end
                 S3:
                 begin
@@ -406,12 +389,5 @@ module pe_array_controller #(parameter ROW         = 16,   //PE array row size
                     ;
             endcase
         end
-    end
-
-
-
-
-
-
 
 endmodule

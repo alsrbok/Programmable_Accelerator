@@ -126,7 +126,7 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
         end
     end
 
-    localparam [2:0]
+    parameter [2:0]
         IDLE        =  3'b000,  // Initially begin to compute new layer (nothing happen to gbf)
         delay_S1    =  3'b001,
         S1          =  3'b010,  // actv/wgt_gbf buffer1 send data to actv/wgt_rf buffer1
@@ -146,111 +146,45 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
         else
             cur_state <= nxt_state;
     end
-    /**********************************************************************/
-    reg r_actv_rf1_need_data;   //This can detect the initial change of rf1_need_data (negedge & posedge)
-    wire w_xor_actv_rf1_need_data = r_actv_rf1_need_data ^ actv_rf1_need_data;
 
-    reg [1:0] w_xor_actv_rf1_need_delay;
-
-    always@(posedge clk, posedge reset) begin
-        if(reset) begin
-            w_xor_actv_rf1_need_delay <= 2'b11;
-        end
-        else begin
-            w_xor_actv_rf1_need_delay <= {w_xor_actv_rf1_need_delay[0], w_xor_actv_rf1_need_data};
-        end
-    end
-
-    always @(negedge w_xor_actv_rf1_need_data, posedge reset) begin
-        if(reset) begin
-            actv_rf_num <= 1'b0; //r_actv_rf1_need_data <= 1'b0;
-        end
-         else begin
-            actv_rf_num <= ~actv_rf_num;
-            $display($time,"My new actv function is working now");
-            $display($time,"w_xor_actv_rf1_need_data : %d", w_xor_actv_rf1_need_data);
-            $display($time,"r_actv_rf1_need _data : %d",r_actv_rf1_need_data);
-        end
-    end
-
-    always @(negedge clk, posedge reset) begin
-        if(reset)
-            r_actv_rf1_need_data <= 1'b0;
+    always@(negedge actv_rf1_need_data or negedge actv_rf2_need_data) begin
+        actv_rf_num <= ~actv_rf_num;
+        if(~actv_rf_num)
+            rf_actv_buf1_send_finish <= 1'b0;
         else
-            if(~w_xor_actv_rf1_need_data)
-                r_actv_rf1_need_data <= ~r_actv_rf1_need_data;
+            rf_actv_buf2_send_finish <= 1'b0;
+        $display("%0t ns actv_rf_num = %b ", $time, actv_rf_num);
+        $display("%0t ns wgt_rf_num = %b ", $time, wgt_rf_num);
+    end
+    always@(posedge actv_rf1_need_data or posedge actv_rf2_need_data) begin
+        actv_rf_is_used <= 1'b1;
+        $display("%0t ns actv_rf_is_used = %b ", $time, actv_rf_is_used);
+        $display("%0t ns wgt_rf_is_used = %b ", $time, wgt_rf_is_used);
     end
 
-    reg r_actv_rf2_need_data;   //This can detect the change of rf2_need_data (do not consider the initial change of rf1_need_data at S2 state)
-    wire w_xor_actv_rf2_need_data = r_actv_rf2_need_data ^ actv_rf2_need_data;
-
-    always @(negedge w_xor_actv_rf2_need_data, posedge reset) begin
-        if(reset) begin
-            actv_rf_is_used <= 1'b0;
-        end
-        else begin
-            actv_rf_is_used <= 1'b1;
-            $display("%0t ns actv_rf_is_used = %b ", $time, actv_rf_is_used);
-            $display("%0t ns wgt_rf_is_used = %b ", $time, wgt_rf_is_used);
-        end
-    end
-    /**********************************************************************/
-    reg r_wgt_rf1_need_data;
-    wire w_xor_wgt_rf1_need_data = r_wgt_rf1_need_data ^ wgt_rf1_need_data;
-
-    reg [1:0] w_xor_wgt_rf1_need_delay;
-
-    always@(posedge clk, posedge reset) begin
-        if(reset) begin
-            w_xor_wgt_rf1_need_delay <= 2'b11;
-        end
-        else begin
-            w_xor_wgt_rf1_need_delay <= {w_xor_wgt_rf1_need_delay[0], w_xor_wgt_rf1_need_data};
-        end
-    end
-
-    always @(negedge w_xor_wgt_rf1_need_data, posedge reset) begin
-        if(reset) begin
-            wgt_rf_num <= 1'b0; 
-        end
-         else begin
-            wgt_rf_num <= ~wgt_rf_num;
-            $display($time,"My new wgt function is working now");
-            $display($time,"r_wgt_rf1_need_data : %d",r_wgt_rf1_need_data);
-        end
-    end
-
-    always @(negedge clk, posedge reset) begin
-        if(reset)
-            r_wgt_rf1_need_data <= 1'b0;
+    always@(negedge wgt_rf1_need_data or negedge wgt_rf2_need_data) begin
+        wgt_rf_num <= ~wgt_rf_num;
+        if(~wgt_rf_num)
+            rf_wgt_buf1_send_finish <= 1'b0;
         else
-            if(~w_xor_wgt_rf1_need_data)
-                r_wgt_rf1_need_data <= ~r_wgt_rf1_need_data;
+            rf_wgt_buf2_send_finish <= 1'b0;
+        $display("%0t ns actv_rf_num = %b ", $time, actv_rf_num);
+        $display("%0t ns wgt_rf_num = %b ", $time, wgt_rf_num);
+    end
+    always@(posedge wgt_rf1_need_data or posedge wgt_rf2_need_data) begin
+        wgt_rf_is_used <= 1'b1;
+        $display("%0t ns actv_rf_is_used = %b ", $time, actv_rf_is_used);
+        $display("%0t ns wgt_rf_is_used = %b ", $time, wgt_rf_is_used);
     end
 
-    reg r_wgt_rf2_need_data;
-    wire w_xor_wgt_rf2_need_data = r_wgt_rf2_need_data ^ wgt_rf2_need_data;
 
-    always @(negedge w_xor_wgt_rf2_need_data, posedge reset) begin
-        if(reset) begin
-            wgt_rf_is_used <= 1'b0;
-        end
-        else begin
-            wgt_rf_is_used <= 1'b1;
-            $display($time,"My brand new wgt function is working now");
-            $display("%0t ns actv_rf_is_used = %b ", $time, actv_rf_is_used);
-            $display("%0t ns wgt_rf_is_used = %b ", $time, wgt_rf_is_used);
-        end
-    end
 
-    reg delayS1_to_S2;
     always @(posedge clk) begin
         case(cur_state)
             IDLE:
                 if(gbf_actv_data_avail && gbf_wgt_data_avail) begin
                     $display("%0t ns gbf controller's nxt stage is setting to delay_S1 ", $time);
                     nxt_state <= delay_S1;
-                    delayS1_to_S2 <= 1'b0;
                 end
                 else begin
                     nxt_state <= IDLE;
@@ -258,31 +192,23 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
             delay_S1:
                 if(finish)
                     nxt_state <= FINISH;
-                else
-                    if (delayS1_to_S2) begin
-                        $display("%0t ns gbf controller's nxt stage is setting to S2 from delay_S1", $time);
-                        nxt_state <= S2;
-                    end
-                    else begin
-                        $display("%0t ns gbf controller's nxt stage is setting to S1 from delay_S1", $time);
-                        nxt_state <= S1;
-                    end
-
+                else begin
+                    $display("%0t ns gbf controller's nxt stage is setting to S1 ", $time);
+                    actv_rf_is_used <= 1'b0; wgt_rf_is_used <= 1'b0; // due to initial need_data = 1
+                    nxt_state <= S1;
+                end
             S1:
                 if(rf_actv_buf1_send_finish && rf_wgt_buf1_send_finish) begin //It can be modified to actv_rf_end, wgt_rf_end: state change 1 cycle
-                    $display("%0t ns gbf controller's nxt stage is setting to delay_S1 from S1 ", $time);
-                    nxt_state <= delay_S1; delayS1_to_S2 <= 1'b1;
+                    $display("%0t ns gbf controller's nxt stage is setting to S2 from S1 ", $time);
+                    nxt_state <= S2;
+                    actv_rf_end <= 1'b0; wgt_rf_end <= 1'b0;  // To modified end signal correctly, REGISTER update should be done at negedge clk.
+                    //actv_rf_is_used <= 1'b0; wgt_rf_is_used <= 1'b0;
                 end
                 else begin
                     nxt_state <= S1;
                 end
             S2:
-                if(~rf_actv_buf2_send_finish && ~rf_wgt_buf2_send_finish) begin
-                    $display($time,"keep S2 state");
-                    $display("%0t ns actv_gbf_en1b = %b ", $time, actv_gbf_en1b);
-                    $display("%0t ns wgt_gbf_en1b = %b ", $time, wgt_gbf_en1b);
-                    $display("%0t ns actv_rf_is_used = %b ", $time, actv_rf_is_used);
-                    $display("%0t ns wgt_rf_is_used = %b ", $time, wgt_rf_is_used);
+                if((actv_gbf_en1b || ~actv_rf_is_used) && (wgt_gbf_en1b || ~wgt_rf_is_used)) begin 
                     nxt_state <= S2;
                 end
                 else if(actv_gbf_end || wgt_gbf_end) begin
@@ -295,7 +221,7 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                             nxt_state <= WAIT;
                         end
                         else begin
-                            if((~actv_rf_end && actv_rf_is_used) && (~wgt_rf_end && wgt_rf_is_used)) begin
+                            if(~(actv_gbf_en1b && actv_rf_is_used) && ~(wgt_gbf_en1b && wgt_rf_is_used)) begin
                                 $display("%0t ns gbf controller's nxt stage is setting to init_S3 from S2 ", $time);
                                 nxt_state <= init_S3;
                             end
@@ -311,7 +237,7 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                             nxt_state <= WAIT;
                         end
                         else begin
-                            if((~actv_rf_end && actv_rf_is_used) && (~wgt_rf_end && wgt_rf_is_used)) begin
+                            if(~(actv_gbf_en1b && actv_rf_is_used) && ~(wgt_gbf_en1b && wgt_rf_is_used)) begin
                                 $display("%0t ns gbf controller's nxt stage is setting to init_S3 from S2 ", $time);
                                 nxt_state <= init_S3;
                             end
@@ -327,7 +253,7 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                             nxt_state <= WAIT;
                         end
                         else begin
-                            if((~actv_rf_end && actv_rf_is_used) && (~wgt_rf_end && wgt_rf_is_used)) begin
+                            if(~(actv_gbf_en1b && actv_rf_is_used) && ~(wgt_gbf_en1b && wgt_rf_is_used)) begin
                                 $display("%0t ns gbf controller's nxt stage is setting to init_S3 from S2 ", $time);
                                 nxt_state <= init_S3;
                             end
@@ -339,7 +265,7 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                     end
                 end
                 else
-                    if((~actv_rf_end && actv_rf_is_used) && (~wgt_rf_end && wgt_rf_is_used)) begin
+                    if(~(actv_gbf_en1b && actv_rf_is_used) && ~(wgt_gbf_en1b && wgt_rf_is_used)) begin
                         $display("%0t ns gbf controller's nxt stage is setting to init_S3 from S2 ", $time);
                         $display("%0t ns actv_gbf_en1b / wgt_gbf_en1b = %d / %d ", $time, actv_gbf_en1b, wgt_gbf_en1b);
                         $display("%0t ns actv_gbf_en1b / actv_rf_is_used / wgt_gbf_en1b / wgt_rf_is_used = %d / %d / %d / %d", $time, actv_gbf_en1b ,actv_rf_is_used ,wgt_gbf_en1b ,wgt_rf_is_used);
@@ -369,7 +295,7 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                 else begin
                     $display("%0t ns gbf controller's nxt stage is setting to WAIT from S3 ", $time);
                     $display("%0t ns actv_gbf_num / actv_gbf_en2b / actv_gbf_en1b /actv_rf_is_used /wgt_gbf_num / wgt_gbf_en2b / wgt_gbf_en1b /wgt_rf_is_used= %d / %d / %d / %d / %d / %d / %d / %d ", $time, actv_gbf_num , actv_gbf_en2b , actv_gbf_en1b ,actv_rf_is_used ,wgt_gbf_num , wgt_gbf_en2b , wgt_gbf_en1b ,wgt_rf_is_used);
-                    //actv_rf_is_used <= 1'b0; wgt_rf_is_used <= 1'b0;
+                    actv_rf_is_used <= 1'b0; wgt_rf_is_used <= 1'b0;
                     nxt_state <= WAIT;
                 end
             WAIT:
@@ -447,7 +373,9 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
             rf_actv_w_addr <= {ACTV_ADDR_BITWIDTH{1'bx}}; rf_wgt_w_addr <= {WGT_ADDR_BITWIDTH{1'bx}};
             rf_actv_data_avail <= 1'b0; rf_wgt_data_avail <= 1'b0;
             conv_finish <= 1'b0;
-            rf_actv_buf1_send_finish <= 1'b0; rf_actv_buf2_send_finish <= 1'b0; rf_wgt_buf1_send_finish <= 1'b0; rf_wgt_buf2_send_finish <= 1'b0;
+            actv_rf_num <= 1'b0; rf_actv_buf1_send_finish <= 1'b0; rf_actv_buf2_send_finish <= 1'b0; actv_rf_is_used <= 1'b0;
+            wgt_rf_num <= 1'b0; rf_wgt_buf1_send_finish <= 1'b0; rf_wgt_buf2_send_finish <= 1'b0; wgt_rf_is_used <= 1'b0;
+
         end
         else begin
             case(cur_state) //non-blocking assignment
@@ -474,15 +402,8 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                     rf_actv_w_addr <= rf_actv_tm_addr[rf_tm_cycle[0]]; rf_wgt_w_addr <= rf_wgt_tm_addr[rf_tm_cycle[1]];
                     if(actv_rf_end) begin rf_actv_buf1_send_finish <= 1'b1; end else begin rf_actv_buf1_send_finish <= 1'b0; end
                     if(wgt_rf_end) begin rf_wgt_buf1_send_finish <= 1'b1; end else begin rf_wgt_buf1_send_finish <= 1'b0; end
-                    if(~w_xor_actv_rf1_need_delay[0]) begin
-                        if(~actv_rf_num) rf_actv_buf1_send_finish <= 1'b0; else rf_actv_buf2_send_finish <= 1'b0;
-                        if(actv_gbf_end) actv_mux_gbf2rf <= ~actv_mux_gbf2rf;
-                    end
-                    if(~w_xor_wgt_rf1_need_delay[0]) begin
-                        if(~wgt_rf_num) rf_wgt_buf1_send_finish <= 1'b0; else rf_wgt_buf2_send_finish <= 1'b0;
-                        if(wgt_gbf_end) wgt_mux_gbf2rf <= ~wgt_mux_gbf2rf;
-                    end
                     conv_finish <= 1'b0;
+                    if(nxt_state == S2) begin actv_gbf_en1b <= 1'b1; wgt_gbf_en1b <=1'b1; end
                     $display("%0t ns actv_rf_end / wgt_rf_end: %d / %d  ", $time, actv_rf_end, wgt_rf_end);
                     $display("%0t ns rf_actv_w_addr / rf_wgt_w_addr: %h / %d  ", $time, rf_actv_w_addr, rf_wgt_w_addr);
                     $display("%0t ns rf_actv_buf1_send_finish / rf_wgt_buf1_send_finish: %d / %d  ", $time, rf_actv_buf1_send_finish, rf_wgt_buf1_send_finish);
@@ -500,14 +421,6 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                         if(actv_rf_end) begin rf_actv_buf2_send_finish <= 1'b1; end else begin rf_actv_buf2_send_finish <= 1'b0; end
                         if(wgt_rf_end) begin rf_wgt_buf2_send_finish <= 1'b1; end else begin rf_wgt_buf2_send_finish <= 1'b0; end
                     end
-                    if(~w_xor_actv_rf1_need_delay[0]) begin
-                        if(~actv_rf_num) rf_actv_buf1_send_finish <= 1'b0; else rf_actv_buf2_send_finish <= 1'b0;
-                        if(actv_gbf_end) actv_mux_gbf2rf <= ~actv_mux_gbf2rf;
-                    end
-                    if(~w_xor_wgt_rf1_need_delay[0]) begin
-                        if(~wgt_rf_num) rf_wgt_buf1_send_finish <= 1'b0; else rf_wgt_buf2_send_finish <= 1'b0;
-                        if(wgt_gbf_end) wgt_mux_gbf2rf <= ~wgt_mux_gbf2rf;
-                    end
                     conv_finish <= 1'b0;
                     $display("%0t ns actv_rf_end / wgt_rf_end: %d / %d  ", $time, actv_rf_end, wgt_rf_end);
                     $display("%0t ns rf_actv_w_addr / rf_wgt_w_addr: %h / %d  ", $time, rf_actv_w_addr, rf_wgt_w_addr);
@@ -516,30 +429,10 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                 init_S3:
                 begin
                     $display("negedge %0t ns gbf controller's cur state: init_S3 ", $time);
-                    if(~w_xor_actv_rf1_need_delay[0]) begin
-                        if(~actv_rf_num) rf_actv_buf1_send_finish <= 1'b0; else rf_actv_buf2_send_finish <= 1'b0;
-                        if(actv_gbf_end) actv_mux_gbf2rf <= ~actv_mux_gbf2rf;
-                    end
-                    if(~w_xor_wgt_rf1_need_delay[0]) begin
-                        if(~wgt_rf_num) rf_wgt_buf1_send_finish <= 1'b0; else rf_wgt_buf2_send_finish <= 1'b0;
-                        if(wgt_gbf_end) wgt_mux_gbf2rf <= ~wgt_mux_gbf2rf;
-                    end
-                    if(actv_gbf_end) begin actv_gbf1_need_data <= ~actv_gbf1_need_data; actv_gbf2_need_data <= ~actv_gbf2_need_data; end else begin actv_gbf1_need_data <= actv_gbf1_need_data; actv_gbf2_need_data <= actv_gbf2_need_data; end
-                    if(wgt_gbf_end) begin wgt_gbf1_need_data <= ~wgt_gbf1_need_data; wgt_gbf2_need_data <= ~wgt_gbf2_need_data; end else begin wgt_gbf1_need_data <= wgt_gbf1_need_data; wgt_gbf2_need_data <= wgt_gbf2_need_data; end
                 end
                 WAIT:
                 begin
                     $display("negedge %0t ns gbf controller's cur state: WAIT ", $time);
-                    $display("w_xor_actv_rf1_need_data: %d", w_xor_actv_rf1_need_data);
-                    $display("w_xor_actv_rf1_need_delay [1] [0]: %d %d", w_xor_actv_rf1_need_delay[1], w_xor_actv_rf1_need_delay[0]);
-                    if(~w_xor_actv_rf1_need_delay[0]) begin
-                        if(~actv_rf_num) rf_actv_buf1_send_finish <= 1'b0; else rf_actv_buf2_send_finish <= 1'b0;
-                        if(actv_gbf_end) actv_mux_gbf2rf <= ~actv_mux_gbf2rf;
-                    end
-                    if(~w_xor_wgt_rf1_need_delay[0]) begin
-                        if(~wgt_rf_num) rf_wgt_buf1_send_finish <= 1'b0; else rf_wgt_buf2_send_finish <= 1'b0;
-                        if(wgt_gbf_end) wgt_mux_gbf2rf <= ~wgt_mux_gbf2rf;
-                    end
                     rf_actv_w_addr <= rf_actv_tm_addr[rf_tm_cycle[0]]; rf_wgt_w_addr <= rf_wgt_tm_addr[rf_tm_cycle[1]];
                     if(nxt_state != init_S3) begin
                         if(actv_rf_end) begin 
@@ -579,14 +472,6 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                 end
                 S3:
                 begin
-                    if(~w_xor_actv_rf1_need_delay[0]) begin
-                        if(~actv_rf_num) rf_actv_buf1_send_finish <= 1'b0; else rf_actv_buf2_send_finish <= 1'b0;
-                        if(actv_gbf_end) actv_mux_gbf2rf <= ~actv_mux_gbf2rf;
-                    end
-                    if(~w_xor_wgt_rf1_need_delay[0]) begin
-                        if(~wgt_rf_num) rf_wgt_buf1_send_finish <= 1'b0; else rf_wgt_buf2_send_finish <= 1'b0;
-                        if(wgt_gbf_end) wgt_mux_gbf2rf <= ~wgt_mux_gbf2rf;
-                    end
                     $display("negedge %0t ns gbf controller's cur state: S3 ", $time);
                     rf_actv_w_addr <= rf_actv_tm_addr[rf_tm_cycle[0]]; rf_wgt_w_addr <= rf_wgt_tm_addr[rf_tm_cycle[1]];
                     if(actv_rf_end) begin 
@@ -621,14 +506,8 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                 end
                 //WAIT:   //nothing to change the output or register
                 //    ;
-                FINISH:
-                begin
-                    rf_actv_data_avail <= 1'b0; rf_wgt_data_avail <= 1'b0;
-                    actv_mux_gbf2rf <= 1'bx; wgt_mux_gbf2rf <= 1'bx;
-                    actv_gbf1_need_data <= 1'b1; actv_gbf2_need_data <= 1'b1; wgt_gbf1_need_data <= 1'b1; wgt_gbf2_need_data <= 1'b1;
-                    rf_actv_buf1_send_finish <= 1'b0; rf_actv_buf2_send_finish <= 1'b0; rf_wgt_buf1_send_finish <= 1'b0; rf_wgt_buf2_send_finish <= 1'b0;
-                    conv_finish <= 1'b1;
-                end
+                FINISH: //setting of finish is done at negedge
+                    ;
                 default:
                     ;
             endcase
@@ -682,10 +561,8 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                 begin
                     $display("posedge %0t ns gbf controller's nxt state: S2 ", $time);
                     actv_gbf_addrb <= gbf_rel_cycle[0]*gbf_addr_per_rf[0]+gbf_addr_per_rf_cycle[0]; wgt_gbf_addrb <= gbf_rel_cycle[1]*gbf_addr_per_rf[1]+gbf_addr_per_rf_cycle[1];  //a*b+c
-                    if(cur_state == S1) actv_gbf_en1b <= 1'b1; else begin if(actv_rf_end) begin actv_gbf_en1b <= 1'b0; end else begin actv_gbf_en1b <= 1'b1; end end
-                    actv_gbf_en2b <= 1'b0; 
-                    if(cur_state == S1) wgt_gbf_en1b <= 1'b1; else begin if(wgt_rf_end) begin wgt_gbf_en1b <= 1'b0; end else begin wgt_gbf_en1b <= 1'b1; end end
-                    wgt_gbf_en2b <= 1'b0;
+                    if(actv_rf_end) begin actv_gbf_en1b <= 1'b0; end else begin actv_gbf_en1b <= 1'b1; end actv_gbf_en2b <= 1'b0; 
+                    if(wgt_rf_end) begin wgt_gbf_en1b <= 1'b0; end else begin wgt_gbf_en1b <= 1'b1; end wgt_gbf_en2b <= 1'b0;
                     actv_mux32_addr <= rf_mux32_addr_cycle[0]; wgt_mux32_addr <= rf_mux32_addr_cycle[1];
                     if(actv_rf_end) begin rf_actv_en_addr <= 3'bx; end else begin rf_actv_en_addr <= rf_en_cycle[0]; end
                     if(wgt_rf_end) begin rf_wgt_en_addr <= 3'bx; end else begin rf_wgt_en_addr <= rf_en_cycle[1]; end
@@ -701,14 +578,11 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                 init_S3:
                 begin
                     $display("posedge %0t ns gbf controller's nxt state: init_S3 ", $time);
-                    if(actv_rf_is_used) begin
-                        if(actv_gbf_num) actv_gbf_en2b <= 1'b1;
-                        else actv_gbf_en1b <= 1'b1;
-                    end
-                    if(wgt_rf_is_used) begin
-                        if(wgt_gbf_num) wgt_gbf_en2b <= 1'b1;
-                        else wgt_gbf_en1b <= 1'b1;
-                    end
+                    if(actv_gbf_end) begin actv_mux_gbf2rf <= ~actv_mux_gbf2rf; end else begin actv_mux_gbf2rf <= actv_mux_gbf2rf; end
+                    if(wgt_gbf_end) begin wgt_mux_gbf2rf <= ~wgt_mux_gbf2rf; end else begin wgt_mux_gbf2rf <= wgt_mux_gbf2rf; end
+                    if(actv_gbf_end) begin actv_gbf1_need_data <= ~actv_gbf1_need_data; actv_gbf2_need_data <= ~actv_gbf2_need_data; end else begin actv_gbf1_need_data <= actv_gbf1_need_data; actv_gbf2_need_data <= actv_gbf2_need_data; end
+                    if(wgt_gbf_end) begin wgt_gbf1_need_data <= ~wgt_gbf1_need_data; wgt_gbf2_need_data <= ~wgt_gbf2_need_data; end else begin wgt_gbf1_need_data <= wgt_gbf1_need_data; wgt_gbf2_need_data <= wgt_gbf2_need_data; end
+                    actv_gbf_end <= 1'b0; wgt_gbf_end <= 1'b0;
                     actv_rf_end_out <= actv_rf_end; wgt_rf_end_out <= wgt_rf_end;
                     $display("%0t ns gbf_irrel_cycle[0] / gbf_rel_cycle[0] / gbf_addr_per_rf[0] / gbf_addr_per_rf_cycle[0]: %d / %d / %d / %d ", $time, gbf_irrel_cycle[0], gbf_rel_cycle[0], gbf_addr_per_rf[0], gbf_addr_per_rf_cycle[0]);
                     $display("%0t ns gbf_irrel_cycle[1] / gbf_rel_cycle[1] / gbf_addr_per_rf[1] / gbf_addr_per_rf_cycle[1]: %d / %d / %d / %d ", $time, gbf_irrel_cycle[1], gbf_rel_cycle[1], gbf_addr_per_rf[1], gbf_addr_per_rf_cycle[1]);
@@ -842,10 +716,15 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                 begin
                     $display("posedge %0t ns gbf controller's nxt state: FINISH ", $time);
                     actv_gbf_addrb <= {GBF_ADDR_BITWIDTH{1'bx}}; wgt_gbf_addrb <= {GBF_ADDR_BITWIDTH{1'bx}};
+                    actv_mux_gbf2rf <= 1'bx; wgt_mux_gbf2rf <= 1'bx;
                     actv_gbf_en1b <= 1'b0; actv_gbf_en2b <= 1'b0; wgt_gbf_en1b <= 1'b0; wgt_gbf_en2b <= 1'b0;
                     actv_mux32_addr <= 3'bx; wgt_mux32_addr <= 3'bx;
+                    actv_gbf1_need_data <= 1'b1; actv_gbf2_need_data <= 1'b1; wgt_gbf1_need_data <= 1'b1; wgt_gbf2_need_data <= 1'b1;
                     rf_actv_en_addr <= 3'bx; rf_actv_w_addr <= {ACTV_ADDR_BITWIDTH{1'bx}};
                     rf_wgt_en_addr <= 3'bx; rf_wgt_w_addr <= {WGT_ADDR_BITWIDTH{1'bx}};
+                    rf_actv_data_avail <= 1'b0; rf_wgt_data_avail <= 1'b0; 
+                    rf_actv_buf1_send_finish <= 1'b0; rf_actv_buf2_send_finish <= 1'b0; rf_wgt_buf1_send_finish <= 1'b0; rf_wgt_buf2_send_finish <= 1'b0;
+                    conv_finish <= 1'b1;
                 end
                 default:
                     ;
@@ -895,7 +774,7 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                     $display($time, " rf_tm_cycle[0] : %h", rf_tm_cycle[0]);
                     $display($time, " rf_tm_cycle[1] : %h", rf_tm_cycle[1]);
                 end
-                S2:
+                S2, WAIT:
                 begin
                     //activation's loop
                     //cycle 2
@@ -926,53 +805,40 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                     $display($time, " rf_tm_cycle[0] : %h", rf_tm_cycle[0]);
                     $display($time, " rf_tm_cycle[1] : %h", rf_tm_cycle[1]);
                 end
-                WAIT:
-                begin
-                    //activation's loop
-                    //cycle 2
-                    if((rf_tm_cycle[0] < rf_tm_num[0]-1) && (~actv_rf_end) && w_xor_actv_rf1_need_delay[0])
-                        if(nxt_state != init_S3) begin
-                            $display($time, " update occured");
-                            rf_tm_cycle[0] <= rf_tm_cycle[0]+1;
-                        end
-                        else begin
-                            $display($time, " preserved");
-                            rf_tm_cycle[0] <= rf_tm_cycle[0];
-                        end
-                    else
-                        rf_tm_cycle[0] <= {max_tm_cycle_bitwidth{1'b0}};
-                    //weight's loop
-                    //cycle 2
-                    if((rf_tm_cycle[1] < rf_tm_num[1]-1) && (~wgt_rf_end) && w_xor_wgt_rf1_need_delay[0])
-                        if(nxt_state != init_S3) begin
-                            $display($time, " update occured");
-                            rf_tm_cycle[1] <= rf_tm_cycle[1]+1;
-                        end
-                        else begin
-                            $display($time, " preserved");
-                            rf_tm_cycle[1] <= rf_tm_cycle[1];
-                        end
-                    else
-                        rf_tm_cycle[1] <= {max_tm_cycle_bitwidth{1'b0}};
-                    $display($time, " rf_tm_cycle[0] : %h", rf_tm_cycle[0]);
-                    $display($time, " rf_tm_cycle[1] : %h", rf_tm_cycle[1]);
-                end
                 init_S3:
                 begin
+                    if((actv_rf1_need_data && ~rf_actv_buf1_send_finish) || (actv_rf2_need_data && ~rf_actv_buf2_send_finish))
+                        actv_rf_end <= 1'b0;
+                    else
+                        actv_rf_end <= actv_rf_end;
+                    if((wgt_rf1_need_data && ~rf_wgt_buf1_send_finish) || (wgt_rf2_need_data && ~rf_wgt_buf2_send_finish))
+                        wgt_rf_end <= 1'b0;
+                    else
+                        wgt_rf_end <= wgt_rf_end;
+
                     if(actv_rf_is_used || ((~actv_rf_num && ~rf_actv_buf1_send_finish)||(actv_rf_num && ~rf_actv_buf2_send_finish)))
-                        if((rf_tm_cycle[0] < rf_tm_num[0]-1) && (~actv_rf_end) && w_xor_actv_rf1_need_delay[0])
+                        if((rf_tm_cycle[0] < rf_tm_num[0]-1) && (~actv_rf_end))
                             rf_tm_cycle[0] <= rf_tm_cycle[0]+1;
                         else
                             rf_tm_cycle[0] <= {max_tm_cycle_bitwidth{1'b0}};
                     else
                         rf_tm_cycle[0] <= {max_tm_cycle_bitwidth{1'b0}};
                     if(wgt_rf_is_used || ((~wgt_rf_num && ~rf_wgt_buf1_send_finish)||(wgt_rf_num && ~rf_wgt_buf2_send_finish)))
-                        if((rf_tm_cycle[1] < rf_tm_num[1]-1) && (~wgt_rf_end) && w_xor_wgt_rf1_need_delay[0])
+                        if((rf_tm_cycle[1] < rf_tm_num[1]-1) && (~wgt_rf_end))
                             rf_tm_cycle[1] <= rf_tm_cycle[1]+1;
                         else
                             rf_tm_cycle[1] <= {max_tm_cycle_bitwidth{1'b0}};
                     else
                         rf_tm_cycle[1] <= {max_tm_cycle_bitwidth{1'b0}};
+                    //as S3, S2, WAIT state use init_S3 state and the update is based on cur_state, init_S3 state should decrease 1
+                    if(actv_rf_is_used) begin
+                        if(actv_gbf_num) actv_gbf_en2b <= 1'b1;
+                        else actv_gbf_en1b <= 1'b1;
+                    end
+                    if(wgt_rf_is_used) begin
+                        if(wgt_gbf_num) wgt_gbf_en2b <= 1'b1;
+                        else wgt_gbf_en1b <= 1'b1;
+                    end
                     $display($time, " rf_tm_cycle[0] : %h", rf_tm_cycle[0]);
                     $display($time, " rf_tm_cycle[1] : %h", rf_tm_cycle[1]);
                 end
@@ -981,7 +847,7 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                     //activation's loop
                     //cycle 2
                     if(actv_rf_is_used || ((~actv_rf_num && ~rf_actv_buf1_send_finish)||(actv_rf_num && ~rf_actv_buf2_send_finish)))
-                        if((rf_tm_cycle[0] < rf_tm_num[0]-1) && (~actv_rf_end) && w_xor_actv_rf1_need_delay[0])
+                        if((rf_tm_cycle[0] < rf_tm_num[0]-1) && (~actv_rf_end))
                             rf_tm_cycle[0] <= rf_tm_cycle[0]+1;
                         else
                             rf_tm_cycle[0] <= {max_tm_cycle_bitwidth{1'b0}};
@@ -991,7 +857,7 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                     //weight's loop
                     //cycle 2
                     if(wgt_rf_is_used || ((~wgt_rf_num && ~rf_wgt_buf1_send_finish)||(wgt_rf_num && ~rf_wgt_buf2_send_finish)))
-                        if((rf_tm_cycle[1] < rf_tm_num[1]-1) && (~wgt_rf_end) && w_xor_wgt_rf1_need_delay[0])
+                        if((rf_tm_cycle[1] < rf_tm_num[1]-1) && (~wgt_rf_end))
                             rf_tm_cycle[1] <= rf_tm_cycle[1]+1;
                         else
                             rf_tm_cycle[1] <= {max_tm_cycle_bitwidth{1'b0}};
@@ -1005,8 +871,6 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
             endcase
         end
     end
-
-    reg flag;
     //posedge update of the REGISTER
     always @(posedge clk, posedge reset) begin
         if(reset) begin
@@ -1032,12 +896,6 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                 end
                 S1, S2, WAIT:
                 begin
-                    if(~w_xor_actv_rf1_need_data) begin
-                        actv_rf_end <= 1'b0;
-                    end
-                    if(~w_xor_wgt_rf1_need_data) begin
-                        wgt_rf_end <= 1'b0;
-                    end
                     //activation's loop
                     //cycle 1
                     if(~actv_rf_end) begin
@@ -1124,33 +982,15 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                 end
                 init_S3:    //do not update the cycle
                 begin
-                    if(~w_xor_actv_rf1_need_data) begin
-                        actv_rf_end <= 1'b0;
-                    end
-                    if(~w_xor_wgt_rf1_need_data) begin
-                        wgt_rf_end <= 1'b0;
-                    end
                     gbf_per_tm_cycle[0] <= gbf_per_tm_cycle[0]; gbf_addr_per_rf_cycle[0] <= gbf_addr_per_rf_cycle[0];
                     gbf_rel_cycle[0] <= gbf_rel_cycle[0]; gbf_irrel_cycle[0] <= gbf_irrel_cycle[0];
                     rf_mux32_addr_cycle[0] <= rf_mux32_addr_cycle[0]; rf_en_cycle[0] <= rf_en_cycle[0];
                     gbf_per_tm_cycle[1] <= gbf_per_tm_cycle[1]; gbf_addr_per_rf_cycle[1] <= gbf_addr_per_rf_cycle[1];
                     gbf_rel_cycle[1] <= gbf_rel_cycle[1]; gbf_irrel_cycle[1] <= gbf_irrel_cycle[1];
                     rf_mux32_addr_cycle[1] <= rf_mux32_addr_cycle[1]; rf_en_cycle[1] <= rf_en_cycle[1];
-                    flag <= 1'b1;
                 end
                 S3:
                 begin
-                    //Since init_S3's negedge, posedge scheme do not work well, S3 need flag to act like init_S3
-                    if(flag) begin
-                        actv_gbf_end <= 1'b0; wgt_gbf_end <= 1'b0;
-                        flag <= 1'b0;
-                    end
-                    if(~w_xor_actv_rf1_need_data) begin
-                        actv_rf_end <= 1'b0;
-                    end
-                    if(~w_xor_wgt_rf1_need_data) begin
-                        wgt_rf_end <= 1'b0;
-                    end
                     //activation's loop
                     if(actv_rf_is_used || ((~actv_rf_num && ~rf_actv_buf1_send_finish)||(actv_rf_num && ~rf_actv_buf2_send_finish))) begin
                         //cycle 1

@@ -1,5 +1,5 @@
 //------------------------------------------------------------+
-// Project: Spatial Accelerator
+// Project: Programmable Accelerator
 // Module: PE_new_array
 // Description:
 //		PE_array with PE_new
@@ -49,11 +49,11 @@ module PE_new_array #(parameter ROW         = 16,   //PE array row size
                 .wgt_r_addr2(wgt_r_addr2), .wgt_w_addr2(wgt_w_addr),
                 .wgt_data1(wire_wgt_data[IN_BITWIDTH*(COL*i+j+1)-1 : IN_BITWIDTH*(COL*i+j)]), .wgt_data2(wire_wgt_data[IN_BITWIDTH*(COL*i+j+1)-1 : IN_BITWIDTH*(COL*i+j)]),
                 .psum_addr1(psum_addr1), .psum_addr2(psum_addr2), .psum_write_addr(psum_write_addr), .addr_from_su_adder(addr_from_su_adder),
-                .psum_out1(wire_psum1[OUT_BITWIDTH*(COL*i+j+1)-1 : OUT_BITWIDTH*(COL*i+j)]), .psum_out2(wire_psum2[OUT_BITWIDTH*(COL*i+j+1)-1 : OUT_BITWIDTH*(COL*i+j)])
+                .psum_out1(wire_psum1[OUT_BITWIDTH*(COL*(ROW-i)-j)-1 : OUT_BITWIDTH*(COL*(ROW-i)-j-1)]), .psum_out2(wire_psum2[OUT_BITWIDTH*(COL*(ROW-i)-j)-1 : OUT_BITWIDTH*(COL*(ROW-i)-j-1)])
                 );
 
-                mux2 #(.WIDTH(OUT_BITWIDTH)) mux(.zero(wire_psum1[OUT_BITWIDTH*(COL*i+j+1)-1 : OUT_BITWIDTH*(COL*i+j)]), .one(wire_psum2[OUT_BITWIDTH*(COL*i+j+1)-1 : OUT_BITWIDTH*(COL*i+j)]), 
-                .sel(psum_en), .out(psum_out[OUT_BITWIDTH*(COL*i+j+1)-1 : OUT_BITWIDTH*(COL*i+j)])
+                mux2 #(.WIDTH(OUT_BITWIDTH)) mux(.zero(wire_psum1[OUT_BITWIDTH*(COL*(ROW-i)-j)-1 : OUT_BITWIDTH*(COL*(ROW-i)-j-1)]), .one(wire_psum2[OUT_BITWIDTH*(COL*(ROW-i)-j)-1 : OUT_BITWIDTH*(COL*(ROW-i)-j-1)]), 
+                .sel(psum_en), .out(psum_out[OUT_BITWIDTH*(COL*(ROW-i)-j)-1 : OUT_BITWIDTH*(COL*(ROW-i)-j-1)])
                 );
             end
         end

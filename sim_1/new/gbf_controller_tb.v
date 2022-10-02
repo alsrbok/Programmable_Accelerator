@@ -1,5 +1,5 @@
 //------------------------------------------------------------+
-// Project: Spatial Accelerator
+// Project: Programmable Accelerator
 // Module: gbf_controller_tb
 // Description:
 //		testbench for gbf_controller
