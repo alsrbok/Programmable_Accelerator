@@ -26,12 +26,13 @@ module su_adder_v1_tb ();
     wire [PSUM_RF_ADDR_BITWIDTH-1:0] psum_rf_addr;
     wire su_add_finish;
     wire [GBF_DATA_BITWIDTH-1:0] out_data;
-    wire psum_write_en;
-    wire [9:0] psum_BRAM_addr;
+    wire psum_gbf_w_en;
+    wire [4:0] psum_gbf_w_addr;
+    wire psum_gbf_w_num; 
 
     su_adder_v1 #(.ROW(ROW), .COL(COL), .DATA_BITWIDTH(DATA_BITWIDTH), .GBF_DATA_BITWIDTH(GBF_DATA_BITWIDTH), .PSUM_RF_ADDR_BITWIDTH(PSUM_RF_ADDR_BITWIDTH),
     .DEPTH(DEPTH)) u_su_adder_v1(.clk(clk), .reset(reset), .psum_out(psum_out), .pe_psum_finish(pe_psum_finish), .conv_finish(conv_finish), .irrel_num(irrel_num),
-    .psum_rf_addr(psum_rf_addr), .su_add_finish(su_add_finish), .out_data(out_data), .psum_write_en(psum_write_en), .psum_BRAM_addr(psum_BRAM_addr));
+    .psum_rf_addr(psum_rf_addr), .su_add_finish(su_add_finish), .out_data(out_data), .psum_gbf_w_en(psum_gbf_w_en), .psum_gbf_w_addr(psum_gbf_w_addr), .psum_gbf_w_num(psum_gbf_w_num));
 
     always
         #5 clk = ~clk;

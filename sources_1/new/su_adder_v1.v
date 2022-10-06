@@ -22,29 +22,31 @@ module su_adder_v1 #(parameter ROW                   = 16,
                 input [4:0] irrel_num,                                   //irrelevant operand number on D1 of pe array :2~16
                 output reg [PSUM_RF_ADDR_BITWIDTH-1:0] psum_rf_addr,    //psum address whose data will be used in this module (output for gbf_pe_array)
                 output reg su_add_finish,                               //output for gbf_pe_array
-                output reg [GBF_DATA_BITWIDTH-1:0] out_data,            //output for psum_gbf
-                output reg psum_write_en,                               //output for psum_gbf
-                output [9:0] psum_BRAM_addr);                           //output for psum_gbf
+                output reg [GBF_DATA_BITWIDTH-1:0] out_data,                //output data for psum_gbf
+                output reg psum_gbf_w_en,                               //write enable for psum_gbf
+                output [4:0] psum_gbf_w_addr,                           //write address for psum_gbf
+                output reg psum_gbf_w_num);                             //currently, write data to psum_gbf buf 1(0) / 2(1)
 
     /*META DATA*/
     //reg [ROW*COL-1:0] A_adder_mode[0:3]; //We should use BRAM
     reg [1:0] A_adder_mode_num[0:1];     //number of used cycle of A_adder_mode, dummy [1] for making it as a memory
-    reg [9:0] sram_psum_num[0:1];        //number of psum cycle on sram (rel, irrel), dummy [1]
+    reg [7:0] psum_gbf_num[0:1];        //[0]: irrel num on psum_gbf, [1]: rel num on psum_gbf
 
     always @(posedge reset) begin
         if(reset) begin //reset become 1 when one layer start to being computed == update the meta data
             $display("intialize the meta data for su_adder_v1 ");
             $readmemh("A_adder_mode_num.mem", A_adder_mode_num);
-            $readmemh("sram_psum_num.mem", sram_psum_num);
+            $readmemh("psum_gbf_num.mem", psum_gbf_num);
 
             $display("check the initialization");
-            $display("sram_psum_num: [0]=%d", sram_psum_num[0]);
+            $display("psum_gbf_num: [0] [1] =%d %d", psum_gbf_num[0], psum_gbf_num[1]);
         end
     end
 
     /*REGISTER FOR THE COUNTER*/
     reg [1:0] A_adder_mode_cycle;   //it can be iterate between value of 0 to 3. : address for A_adder_mode_BRAM
-    reg [9:0] sram_psum_cycle;
+    reg [7:0] psum_gbf_irrel_cycle;     //irrel cycle on psum_gbf correspond to psum_gbf_num[0]
+    reg [4:0] psum_gbf_rel_cycle;       //rel cycle on psum_gbf correspond to psum_gbf_num[1]
     reg A_addr_en;                 //read enable signal for A_adder_mode_BRAM
     reg [2:0] max_su_cycle;         //Bitwidth should be changed based on maximum cycle number
     reg [2:0] su_cycle;             
@@ -143,9 +145,12 @@ module su_adder_v1 #(parameter ROW                   = 16,
 
     integer idx;
 
+    reg delay[0:2];
+    reg stop, flag;
     always @(negedge clk, posedge reset) begin
         if(reset) begin
-            sram_psum_cycle <= 10'b0;
+            psum_gbf_irrel_cycle <= 8'b0; psum_gbf_rel_cycle <= 5'b0;
+            psum_gbf_w_en <= 1'b0; psum_gbf_w_num <= 1'b0; flag <= 1'b1;
         end
         else begin
             case(nxt_state)
@@ -153,7 +158,10 @@ module su_adder_v1 #(parameter ROW                   = 16,
                 begin
                     su_cycle <= 3'b0; finish <= 1'b0;
                     psum_rf_addr <= {PSUM_RF_ADDR_BITWIDTH{1'b0}}; out_data <= {GBF_DATA_BITWIDTH{1'b0}};
-                    A_adder_mode_cycle <= 2'b00; A_addr_en <= 1'b1; psum_write_en <= 1'b0;
+                    A_adder_mode_cycle <= 2'b00; A_addr_en <= 1'b1; psum_gbf_w_en <= 1'b0;
+                    for(idx=0; idx<3; idx=idx+1) begin
+                        delay[idx] <= 1'b0;
+                    end
                     //sram_psum_cycle <= sram_psum_cycle;
                     case(irrel_num)
                         5'd2: max_su_cycle <= 3'd4;
@@ -173,10 +181,15 @@ module su_adder_v1 #(parameter ROW                   = 16,
                         if(A_adder_mode_num[0] == 2'b01)
                             A_adder_mode_cycle <= 2'b00;
                         else begin
-                            if(A_adder_mode_cycle < A_adder_mode_num[0]-1) begin
+                            if(A_adder_mode_cycle < A_adder_mode_num[0]) begin
                                 $display($time,"ns, A_adder_mode_cycle : %d",A_adder_mode_cycle);
                                 $display($time,"ns, w_A_adder_mode : %h",w_A_adder_mode);
-                                A_adder_mode_cycle <= A_adder_mode_cycle + 1;
+                                if(delay[0]) begin
+                                    A_adder_mode_cycle <= A_adder_mode_cycle + 1; delay[0] <= 1'b0;
+                                end
+                                else begin
+                                    delay[0] <= 1'b1;
+                                end
                             end
                             else begin
                                 $display($time,"ns, A_adder_mode_cycle : %d",A_adder_mode_cycle);
@@ -184,12 +197,47 @@ module su_adder_v1 #(parameter ROW                   = 16,
                                 A_adder_mode_cycle <= 2'b00;
                             end
                         end
-                        //output for psum_BRAM (psum_gbf or sram)
-                        psum_write_en <= 1'b1;
-                        if(sram_psum_cycle < sram_psum_num[0]-1)
-                            sram_psum_cycle <= sram_psum_cycle + 1;
-                        else
-                            sram_psum_cycle <= 10'b0;
+                        //output for psum_gbf
+                        if(psum_gbf_rel_cycle < psum_gbf_num[1]) begin
+                            if(delay[1]) begin
+                                $display($time,"rel_cycle is updated");
+                                psum_gbf_rel_cycle <= psum_gbf_rel_cycle + 1; delay[1] <= 1'b0;
+                            end
+                            else begin
+                                if(stop) begin
+                                    $display($time,"rel_cycle is not updated by stop=1");
+                                    delay[1] <= 1'b0;
+                                end
+                                else
+                                    if(flag) begin
+                                        $display($time,"rel_cycle is not updated by flag=1");
+                                        delay[1] <= 1'b0; flag <= 1'b0;
+                                    end
+                                    else begin
+                                        $display($time,"rel_cycle update is delayed");
+                                        delay[1] <= 1'b1;
+                                    end
+                            end
+                        end
+                        else begin
+                             if(delay[1]) begin
+                                psum_gbf_rel_cycle <= 5'b0; //flag <= 1'b1;
+                                $display($time,"psum_gbf_irrel_cycle: %d", psum_gbf_irrel_cycle);
+                                if(psum_gbf_irrel_cycle < psum_gbf_num[0])
+                                    psum_gbf_irrel_cycle <= psum_gbf_irrel_cycle + 1;
+                                else begin
+                                    $display($time,"change the psum_gbf_w_num");
+                                    psum_gbf_irrel_cycle <= 8'b1; psum_gbf_w_num <= ~psum_gbf_w_num;
+                                end
+                                delay[1] <= 1'b0;
+                            end
+                            else begin
+                                if(stop)
+                                    delay[1] <= 1'b0;
+                                else
+                                    delay[1] <= 1'b1;
+                            end
+                        end
 
                         case(irrel_num)
                             5'd2:
@@ -263,16 +311,27 @@ module su_adder_v1 #(parameter ROW                   = 16,
                                         for(idx=16; idx<32; idx=idx+1)
                                             out_data[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(idx+1) +: DATA_BITWIDTH] <= {DATA_BITWIDTH{1'b0}};
                                     end   
+                                endcase
                             5'd8:
                                 for(idx=0; idx<32; idx=idx+1)
                                     out_data[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(idx+1) +: DATA_BITWIDTH] <= C_out[idx];
-                                endcase
+                                
                             default:
                                 out_data <= {GBF_DATA_BITWIDTH{1'bx}};
                         endcase
-                        if(su_cycle < max_su_cycle-1)
-                            su_cycle <= su_cycle + 1;
+                        if(su_cycle < max_su_cycle) begin
+                            stop <= 1'b0;
+                            psum_gbf_w_en <= 1'b1;
+                            if(delay[2]) begin
+                                su_cycle <= su_cycle + 1; delay[2] <= 1'b0;
+                            end
+                            else begin
+                                delay[2] <= 1'b1;
+                            end
+                        end
                         else begin
+                            stop <= 1'b1;
+                            psum_gbf_w_en <= 1'b0;
                             su_cycle <= 3'b0;
                             if(psum_rf_addr < {PSUM_RF_ADDR_BITWIDTH{1'b1}}) begin
                                 psum_rf_addr <= psum_rf_addr + 1;
@@ -291,6 +350,6 @@ module su_adder_v1 #(parameter ROW                   = 16,
         end
     end
 
-    assign psum_BRAM_addr = sram_psum_cycle;
+    assign psum_gbf_w_addr = psum_gbf_rel_cycle;
 
 endmodule
