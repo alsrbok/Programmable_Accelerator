@@ -17,6 +17,7 @@ module su_adder_tb ();
     parameter DATA_BITWIDTH             = 16;
     parameter GBF_DATA_BITWIDTH         = 512;
     parameter PSUM_RF_ADDR_BITWIDTH     = 2;
+    parameter GBF_ADDR_BITWIDTH         = 5;
     parameter DEPTH                     = 32;
 
     reg clk, reset;
@@ -35,7 +36,7 @@ module su_adder_tb ();
     wire psum_gbf_w_en_for_init;
     wire [4:0] psum_gbf_w_addr_for_init;
 
-    su_adder #(.ROW(ROW), .COL(COL), .DATA_BITWIDTH(DATA_BITWIDTH), .GBF_DATA_BITWIDTH(GBF_DATA_BITWIDTH), .PSUM_RF_ADDR_BITWIDTH(PSUM_RF_ADDR_BITWIDTH),
+    su_adder #(.ROW(ROW), .COL(COL), .DATA_BITWIDTH(DATA_BITWIDTH), .GBF_DATA_BITWIDTH(GBF_DATA_BITWIDTH), .PSUM_RF_ADDR_BITWIDTH(PSUM_RF_ADDR_BITWIDTH), .GBF_ADDR_BITWIDTH(GBF_ADDR_BITWIDTH),
     .DEPTH(DEPTH)) u_su_adder(.clk(clk), .reset(reset), .psum_out(psum_out), .pe_psum_finish(pe_psum_finish), .conv_finish(conv_finish),
     .psum_rf_addr(psum_rf_addr), .su_add_finish(su_add_finish), .out_data(out_data), .psum_gbf_w_en(psum_gbf_w_en), .psum_gbf_w_addr(psum_gbf_w_addr), .psum_gbf_w_num(psum_gbf_w_num),
     .psum_gbf_r_en(psum_gbf_r_en), .psum_gbf_r_addr(psum_gbf_r_addr), .psum_gbf_w_en_for_init(psum_gbf_w_en_for_init), .psum_gbf_w_addr_for_init(psum_gbf_w_addr_for_init));

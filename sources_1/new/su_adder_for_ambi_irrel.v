@@ -30,7 +30,7 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                 output reg psum_gbf_w_num);                             //currently, write data to psum_gbf buf 1(0) / 2(1)
 
     /*META DATA*/
-    reg [7:0] psum_gbf_num[0:1];        //[0]: irrel num on psum_gbf, [1]: product of rel num on su, rf, gbf / 32
+    reg [7:0] psum_gbf_num[0:1];        //[0]: irrel num on psum_gbf - 1, [1]: rel*irrel num on psum_gbf - 1
 
     always @(posedge reset) begin
         if(reset) begin //reset become 1 when one layer start to being computed == update the meta data

@@ -30,7 +30,7 @@ module su_adder_v1 #(parameter ROW                   = 16,
     /*META DATA*/
     //reg [ROW*COL-1:0] A_adder_mode[0:3]; //We should use BRAM
     reg [1:0] A_adder_mode_num[0:1];     //number of used cycle of A_adder_mode, dummy [1] for making it as a memory
-    reg [7:0] psum_gbf_num[0:1];        //[0]: irrel num on psum_gbf, [1]: rel num on psum_gbf
+    reg [7:0] psum_gbf_num[0:1];        //[0]: irrel num on psum_gbf - 1, [1]: rel*irrel num on psum_gbf - 1
 
     always @(posedge reset) begin
         if(reset) begin //reset become 1 when one layer start to being computed == update the meta data

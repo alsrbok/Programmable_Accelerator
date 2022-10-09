@@ -28,8 +28,8 @@ module demux2 #( parameter WIDTH = 16)
             one = d_in;
         end
         else begin
-            zero = 1'bX;
-            one = 1'bX;
+            zero = {WIDTH{1'bx}};
+            one = {WIDTH{1'bx}};
         end
     end
 	

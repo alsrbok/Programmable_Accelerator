@@ -67,6 +67,7 @@ module gbf_pe_array_tb();
 
         #5//25ns gbf controller is setting to S1 state : actv_data_avail become 1 : At this time, buf1 is not send data
         gbf_actv_data_avail = 1'b1; gbf_wgt_data_avail = 1'b1;
+        /*
         $display($time, " [gbf_controller] wgt_en1b : %h", u_gbf_pe_array.wire_wgt_en1b);
         $display($time, " [gbf_controller] wgt_addr1b : %h", u_gbf_pe_array.wire_wgt_addr1b);
         $display($time, " [gbf_controller] wgt_r_data1b : %h", u_gbf_pe_array.wire_wgt_r_data1b);
@@ -88,7 +89,7 @@ module gbf_pe_array_tb();
         $display($time, " [pe_array] wire_rf_actv_buf2_send_finish : %h", u_gbf_pe_array.wire_rf_actv_buf2_send_finish);
         $display($time, " [gbf_controller] actv_rf_num : %h", u_gbf_pe_array.u_gbf_controller_new.actv_rf_num);
         $display($time, " [pe_array] wire_actv_rf1_need_data : %h", u_gbf_pe_array.wire_actv_rf1_need_data);
-        $display($time, " [pe_array] wire_actv_rf2_need_data : %h", u_gbf_pe_array.wire_actv_rf2_need_data);
+        $display($time, " [pe_array] wire_actv_rf2_need_data : %h", u_gbf_pe_array.wire_actv_rf2_need_data);*/
 
         for(i=0; i<300; i=i+1) begin
             #5
@@ -122,6 +123,7 @@ module gbf_pe_array_tb();
             $display($time, " [gbf_controller] actv_rf_num : %h", u_gbf_pe_array.u_gbf_controller_new.actv_rf_num);
             $display($time, " [pe_array] wire_actv_rf1_need_data : %h", u_gbf_pe_array.wire_actv_rf1_need_data);
             $display($time, " [pe_array] wire_actv_rf2_need_data : %h", u_gbf_pe_array.wire_actv_rf2_need_data);
+        
         end
 
         

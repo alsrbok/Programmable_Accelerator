@@ -12,10 +12,11 @@
 
 module su_adder #(parameter ROW                   = 16,
                 parameter COL                   = 16,
-                parameter DATA_BITWIDTH         = 16,
-                parameter GBF_DATA_BITWIDTH     = 512,
-                parameter PSUM_RF_ADDR_BITWIDTH    = 2,
-                parameter DEPTH                 = 32)
+                parameter DATA_BITWIDTH         = 16,   //for psum
+                parameter GBF_DATA_BITWIDTH     = 512,  //for psum_gbf
+                parameter PSUM_RF_ADDR_BITWIDTH = 2,
+                parameter GBF_ADDR_BITWIDTH     = 5,    //for psum_gbf
+                parameter DEPTH                 = 32)   //for psum_gbf
               ( input clk, reset, 
                 input [DATA_BITWIDTH*ROW*COL-1:0] psum_out,
                 input pe_psum_finish, conv_finish,
@@ -66,7 +67,7 @@ module su_adder #(parameter ROW                   = 16,
 
     wire [GBF_DATA_BITWIDTH-1:0] w0_out_data, w1_out_data, w2_out_data;
     wire w0_psum_gbf_w_en, w1_psum_gbf_w_en, w2_psum_gbf_w_en;
-    wire [4:0] w0_psum_gbf_w_addr, w1_psum_gbf_w_addr, w2_psum_gbf_w_addr;
+    wire [GBF_ADDR_BITWIDTH-1:0] w0_psum_gbf_w_addr, w1_psum_gbf_w_addr, w2_psum_gbf_w_addr;
     wire w0_psum_gbf_w_num, w1_psum_gbf_w_num, w2_psum_gbf_w_num;
 
     rel_mem_accumulator #(.ROW(ROW), .COL(COL), .DATA_BITWIDTH(DATA_BITWIDTH), .GBF_DATA_BITWIDTH(GBF_DATA_BITWIDTH), .PSUM_RF_ADDR_BITWIDTH(PSUM_RF_ADDR_BITWIDTH),
@@ -83,7 +84,7 @@ module su_adder #(parameter ROW                   = 16,
 
     mux4 #(.WIDTH(GBF_DATA_BITWIDTH)) out_data_mx(.in0(w0_out_data), .in1(w1_out_data), .in2(w2_out_data), .in3(), .sel(mode[0]), .out(out_data));
     mux4 #(.WIDTH(1)) psum_gbf_w_en_mx(.in0(w0_psum_gbf_w_en), .in1(w1_psum_gbf_w_en), .in2(w2_psum_gbf_w_en), .in3(), .sel(mode[0]), .out(psum_gbf_w_en));
-    mux4 #(.WIDTH(5)) psum_gbf_w_addr_mx(.in0(w0_psum_gbf_w_addr), .in1(w1_psum_gbf_w_addr), .in2(w2_psum_gbf_w_addr), .in3(), .sel(mode[0]), .out(psum_gbf_w_addr));
+    mux4 #(.WIDTH(GBF_ADDR_BITWIDTH)) psum_gbf_w_addr_mx(.in0(w0_psum_gbf_w_addr), .in1(w1_psum_gbf_w_addr), .in2(w2_psum_gbf_w_addr), .in3(), .sel(mode[0]), .out(psum_gbf_w_addr));
     mux4 #(.WIDTH(1)) psum_gbf_w_num_mx(.in0(w0_psum_gbf_w_num), .in1(w1_psum_gbf_w_num), .in2(w2_psum_gbf_w_num), .in3(), .sel(mode[0]), .out(psum_gbf_w_num));
 
     localparam [1:0]
