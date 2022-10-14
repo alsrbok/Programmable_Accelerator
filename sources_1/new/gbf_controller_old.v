@@ -1,15 +1,15 @@
 //------------------------------------------------------------+
 // Project: Spatial Accelerator
-// Module: gbf_controller_new
+// Module: gbf_controller_old
 // Description:
-//		gbf_controller_new which generate read-address and enable signal for actv/wgt global buffer.
+//		gbf_controller_old which generate read-address and enable signal for actv/wgt global buffer.
 //      It communicates with SRAM controller and pe_array_controleer in order to generate addr and signals in correct order
 //      It does not care the action inside the pe_array_w_controller module.
 //
 // History: 2022.09.14 by Min-Gyu Park (alsrbok@snu.ac.kr)
 //------------------------------------------------------------+
 
-module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
+module gbf_controller_old #(parameter ROW          = 16,   //PE array row size
                 parameter COL                           = 16,
                 parameter ACTV_ADDR_BITWIDTH            = 2,   //Decide rf_input memory size
                 parameter WGT_ADDR_BITWIDTH             = 2,

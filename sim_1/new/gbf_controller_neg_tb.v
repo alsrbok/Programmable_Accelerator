@@ -31,7 +31,7 @@ module gbf_controller_new_tb();
     wire rf_actv_data_avail, rf_wgt_data_avail, rf_actv_send_finish, rf_wgt_send_finish;
     wire conv_finish;
 
-    gbf_controller_new #(.ROW(ROW), .COL(COL), .ACTV_ADDR_BITWIDTH(ACTV_ADDR_BITWIDTH), .WGT_ADDR_BITWIDTH(WGT_ADDR_BITWIDTH),
+    gbf_controller_old #(.ROW(ROW), .COL(COL), .ACTV_ADDR_BITWIDTH(ACTV_ADDR_BITWIDTH), .WGT_ADDR_BITWIDTH(WGT_ADDR_BITWIDTH),
     .GBF_DATA_BITWIDTH(GBF_DATA_BITWIDTH), .GBF_ADDR_BITWIDTH(GBF_ADDR_BITWIDTH), .GBF_DEPTH(GBF_DEPTH)) u_gbf_controller_new(.clk(clk),
     .reset(reset), .finish(finish), .gbf_actv_data_avail(gbf_actv_data_avail), .gbf_wgt_data_avail(gbf_wgt_data_avail), 
     .gbf_actv_buf1_ready(gbf_actv_buf1_ready), .gbf_actv_buf2_ready(gbf_actv_buf2_ready), .gbf_wgt_buf1_ready(gbf_wgt_buf1_ready), .gbf_wgt_buf2_ready(gbf_wgt_buf2_ready),
