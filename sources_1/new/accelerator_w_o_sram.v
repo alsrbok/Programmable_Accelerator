@@ -59,5 +59,5 @@ module accelerator_w_o_sram #(parameter ROW         = 16,   //PE array row size
     psum_gbf_wrapper #(.ROW(ROW), .COL(COL), .OUT_BITWIDTH(OUT_BITWIDTH), .PSUM_GBF_DATA_BITWIDTH(PSUM_GBF_DATA_BITWIDTH), .PSUM_GBF_ADDR_BITWIDTH(PSUM_GBF_ADDR_BITWIDTH), .PSUM_GBF_DEPTH(PSUM_GBF_DEPTH)
     ) u_psum_gbf_wrapper(.clk(clk), .reset(reset), .out_data(out_data), .psum_gbf_w_en(psum_gbf_w_en), .psum_gbf_w_addr(psum_gbf_w_addr), .psum_gbf_w_num(psum_gbf_w_num), .psum_gbf_r_en(psum_gbf_r_en), .psum_gbf_r_addr(psum_gbf_r_addr), .psum_gbf_w_en_for_init(psum_gbf_w_en_for_init), .psum_gbf_w_addr_for_init(psum_gbf_w_addr_for_init),
     .r_data1b_out(r_data1b), .r_data2b_out(r_data2b), .r_en1b_out(r_en1b_out), .r_en2b_out(r_en2b_out));
-
+ 
 endmodule
