@@ -25,7 +25,7 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                 output reg [PSUM_RF_ADDR_BITWIDTH-1:0] psum_rf_addr,    //psum address whose data will be used in this module (output for gbf_pe_array)
                 output reg su_add_finish,                               //output for gbf_pe_array
                 output [GBF_DATA_BITWIDTH-1:0] out_data,                //output data for psum_gbf
-                output reg psum_gbf_w_en,                               //write enable for psum_gbf
+                output reg psum_gbf_w_en_out,                               //write enable for psum_gbf
                 output [4:0] psum_gbf_w_addr,                           //write address for psum_gbf
                 output reg psum_gbf_w_num);                             //currently, write data to psum_gbf buf 1(0) / 2(1)
 
@@ -140,8 +140,8 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
     always @(negedge clk, posedge reset) begin
         if(reset) begin
             psum_gbf_irrel_cycle <= 8'b0; psum_gbf_rel_cycle <= 5'b0;
-            // when accum_psum become full(accum_psum_flag == 1'b1), enable the psum_gbf_w_en to send 512bits data to psum_gbf
-            accum_psum <= {GBF_DATA_BITWIDTH{1'b0}}; accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0;
+            // when accum_psum become full(accum_psum_flag == 1'b1), enable the psum_gbf_w_en_out to send 512bits data to psum_gbf
+            accum_psum <= {GBF_DATA_BITWIDTH{1'b0}}; accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0;
             psum_gbf_w_num <= 1'b0; flag <= 1'b1; stop <= 1'b0; psum_rf_addr <= {PSUM_RF_ADDR_BITWIDTH{1'b0}}; 
             //for(idx=0; idx<2; idx=idx+1) begin
             //    delay[idx] <= 1'b0;
@@ -151,7 +151,7 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
             case(nxt_state)
                 IDLE:
                 begin
-                    finish <= 1'b0; psum_gbf_w_en <= 1'b0;
+                    finish <= 1'b0; psum_gbf_w_en_out <= 1'b0;
                     if(psum_rf_addr != 0)
                         psum_rf_addr <= psum_rf_addr + 1;   //To properly set the rf_addr for the case : (irrel,rel) = (4,3)
                     //psum_rf_addr <= {PSUM_RF_ADDR_BITWIDTH{1'b0}}; 
@@ -206,12 +206,12 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                         end
                                         else if(accum_psum_cycle == 16) begin
                                             if(delay[1]) begin
-                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; delay[1] <= 1'b0;
+                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; delay[1] <= 1'b0;
                                                 if(psum_rf_addr == {PSUM_RF_ADDR_BITWIDTH{1'b1}}) begin finish <= 1'b1; end
                                                 else begin psum_rf_addr <= psum_rf_addr + 1; end
                                             end
                                             else begin
-                                                accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1; 
+                                                accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1; 
                                                 if(flag) begin
                                                     $display($time,"accum_psum_flag is not updated by flag=1");
                                                     accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+16) +: DATA_BITWIDTH*16] <= {A2_out[0],A2_out[1],A2_out[2],A2_out[3],A2_out[4],A2_out[5],A2_out[6],A2_out[7],A2_out[8],A2_out[9],A2_out[10],A2_out[11],A2_out[12],A2_out[13],A2_out[14],A2_out[15]};
@@ -223,10 +223,10 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                                 end
                                             end
                                         end
-                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //if(accum_psum_cycle == 0) accum_psum_cycle <= accum_psum_cycle + 16; else accum_psum_cycle <= 5'b0;
-                                        //if(accum_psum_cycle == 16) begin accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1; end
-                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        //if(accum_psum_cycle == 16) begin accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1; end
+                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+16) +: DATA_BITWIDTH*16] <= {A2_out[0],A2_out[1],A2_out[2],A2_out[3],A2_out[4],A2_out[5],A2_out[6],A2_out[7],A2_out[8],A2_out[9],A2_out[10],A2_out[11],A2_out[12],A2_out[13],A2_out[14],A2_out[15]};
                                     end
                                     5'd15:
@@ -237,12 +237,12 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                         end
                                         else if(accum_psum_cycle == 15) begin
                                             if(delay[1]) begin
-                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; delay[1] <= 1'b0;
+                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; delay[1] <= 1'b0;
                                                 if(psum_rf_addr == {PSUM_RF_ADDR_BITWIDTH{1'b1}}) begin finish <= 1'b1; end
                                                 else begin psum_rf_addr <= psum_rf_addr + 1; end
                                             end
                                             else begin
-                                                accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1; 
+                                                accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1; 
                                                 if(flag) begin
                                                     $display($time,"accum_psum_flag is not updated by flag=1");
                                                     accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+16) +: DATA_BITWIDTH*16] <= {A2_out[0],A2_out[1],A2_out[2],A2_out[3],A2_out[4],A2_out[5],A2_out[6],A2_out[7],A2_out[8],A2_out[9],A2_out[10],A2_out[11],A2_out[12],A2_out[13],A2_out[14]};
@@ -254,10 +254,10 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                                 end
                                             end
                                         end
-                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //if(accum_psum_cycle == 0) accum_psum_cycle <= accum_psum_cycle + 15; else accum_psum_cycle <= 5'b0;
-                                        //if(accum_psum_cycle == 15) begin accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1;end
-                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        //if(accum_psum_cycle == 15) begin accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1;end
+                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+15) +: DATA_BITWIDTH*15] <= {A2_out[0],A2_out[1],A2_out[2],A2_out[3],A2_out[4],A2_out[5],A2_out[6],A2_out[7],A2_out[8],A2_out[9],A2_out[10],A2_out[11],A2_out[12],A2_out[13],A2_out[14]};
                                     end
                                     5'd14:
@@ -268,12 +268,12 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                         end
                                         else if(accum_psum_cycle == 14) begin
                                             if(delay[1]) begin
-                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; delay[1] <= 1'b0;
+                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; delay[1] <= 1'b0;
                                                 if(psum_rf_addr == {PSUM_RF_ADDR_BITWIDTH{1'b1}}) begin finish <= 1'b1; end
                                                 else begin psum_rf_addr <= psum_rf_addr + 1; end
                                             end
                                             else begin
-                                                accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1; 
+                                                accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1; 
                                                 if(flag) begin
                                                     $display($time,"accum_psum_flag is not updated by flag=1");
                                                     accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+14) +: DATA_BITWIDTH*14] <= {A2_out[0],A2_out[1],A2_out[2],A2_out[3],A2_out[4],A2_out[5],A2_out[6],A2_out[7],A2_out[8],A2_out[9],A2_out[10],A2_out[11],A2_out[12],A2_out[13]};
@@ -285,10 +285,10 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                                 end
                                             end
                                         end
-                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //if(accum_psum_cycle == 0) accum_psum_cycle <= accum_psum_cycle + 14; else accum_psum_cycle <= 5'b0;
-                                        //if(accum_psum_cycle == 14) begin accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1;end
-                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        //if(accum_psum_cycle == 14) begin accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1;end
+                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+14) +: DATA_BITWIDTH*14] <= {A2_out[0],A2_out[1],A2_out[2],A2_out[3],A2_out[4],A2_out[5],A2_out[6],A2_out[7],A2_out[8],A2_out[9],A2_out[10],A2_out[11],A2_out[12],A2_out[13]};
                                     end
                                     5'd13:
@@ -299,12 +299,12 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                         end
                                         else if(accum_psum_cycle == 13) begin
                                             if(delay[1]) begin
-                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; delay[1] <= 1'b0;
+                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; delay[1] <= 1'b0;
                                                 if(psum_rf_addr == {PSUM_RF_ADDR_BITWIDTH{1'b1}}) begin finish <= 1'b1; end
                                                 else begin psum_rf_addr <= psum_rf_addr + 1; end
                                             end
                                             else begin
-                                                accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1; 
+                                                accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1; 
                                                 if(flag) begin
                                                     $display($time,"accum_psum_flag is not updated by flag=1");
                                                     accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+14) +: DATA_BITWIDTH*14] <= {A2_out[0],A2_out[1],A2_out[2],A2_out[3],A2_out[4],A2_out[5],A2_out[6],A2_out[7],A2_out[8],A2_out[9],A2_out[10],A2_out[11],A2_out[12]};
@@ -317,8 +317,8 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                             end
                                         end
                                         //if(accum_psum_cycle == 0) accum_psum_cycle <= accum_psum_cycle + 13; else accum_psum_cycle <= 5'b0;
-                                        //if(accum_psum_cycle == 13) begin accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1;end
-                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        //if(accum_psum_cycle == 13) begin accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1;end
+                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+13) +: DATA_BITWIDTH*13] <= {A2_out[0],A2_out[1],A2_out[2],A2_out[3],A2_out[4],A2_out[5],A2_out[6],A2_out[7],A2_out[8],A2_out[9],A2_out[10],A2_out[11],A2_out[12]};
                                     end
                                     5'd12:
@@ -329,12 +329,12 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                         end
                                         else if(accum_psum_cycle == 12) begin
                                             if(delay[1]) begin
-                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; delay[1] <= 1'b0;
+                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; delay[1] <= 1'b0;
                                                 if(psum_rf_addr == {PSUM_RF_ADDR_BITWIDTH{1'b1}}) begin finish <= 1'b1; end
                                                 else begin psum_rf_addr <= psum_rf_addr + 1; end
                                             end
                                             else begin
-                                                accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1; 
+                                                accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1; 
                                                 if(flag) begin
                                                     $display($time,"accum_psum_flag is not updated by flag=1");
                                                     accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+14) +: DATA_BITWIDTH*14] <= {A2_out[0],A2_out[1],A2_out[2],A2_out[3],A2_out[4],A2_out[5],A2_out[6],A2_out[7],A2_out[8],A2_out[9],A2_out[10],A2_out[11]};
@@ -347,8 +347,8 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                             end
                                         end
                                         //if(accum_psum_cycle == 0) accum_psum_cycle <= accum_psum_cycle + 12; else accum_psum_cycle <= 5'b0;
-                                        //if(accum_psum_cycle == 12) begin accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1;end
-                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        //if(accum_psum_cycle == 12) begin accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1;end
+                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+12) +: DATA_BITWIDTH*12] <= {A2_out[0],A2_out[1],A2_out[2],A2_out[3],A2_out[4],A2_out[5],A2_out[6],A2_out[7],A2_out[8],A2_out[9],A2_out[10],A2_out[11]};
                                     end
                                     default:
@@ -371,12 +371,12 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                         end
                                         else if(accum_psum_cycle == 24) begin
                                             if(delay[1]) begin
-                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0;
+                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0;
                                                 if(psum_rf_addr == {PSUM_RF_ADDR_BITWIDTH{1'b1}}) begin finish <= 1'b1; end
                                                 else begin psum_rf_addr <= psum_rf_addr + 1; end
                                             end
                                             else begin
-                                                accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1; 
+                                                accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1; 
                                                 if(flag) begin
                                                     $display($time,"accum_psum_flag is not updated by flag=1");
                                                     accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+8) +: DATA_BITWIDTH*8] <= {B2_out[0],B2_out[1],B2_out[2],B2_out[3],B2_out[4],B2_out[5],B2_out[6],B2_out[7]};
@@ -388,10 +388,10 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                                 end
                                             end
                                         end
-                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //if(accum_psum_cycle < 24) accum_psum_cycle <= accum_psum_cycle + 8; else accum_psum_cycle <= 5'b0;
-                                        //if(accum_psum_cycle == 24) begin accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1;end
-                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        //if(accum_psum_cycle == 24) begin accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1;end
+                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+8) +: DATA_BITWIDTH*8] <= {B2_out[0],B2_out[1],B2_out[2],B2_out[3],B2_out[4],B2_out[5],B2_out[6],B2_out[7]};
                                     end
                                     5'd7:
@@ -407,12 +407,12 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                         end
                                         else if(accum_psum_cycle == 21) begin
                                             if(delay[1]) begin
-                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0;
+                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0;
                                                 if(psum_rf_addr == {PSUM_RF_ADDR_BITWIDTH{1'b1}}) begin finish <= 1'b1; end
                                                 else begin psum_rf_addr <= psum_rf_addr + 1; end
                                             end
                                             else begin
-                                                accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1; 
+                                                accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1; 
                                                 if(flag) begin
                                                     $display($time,"accum_psum_flag is not updated by flag=1");
                                                     accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+7) +: DATA_BITWIDTH*7] <= {B2_out[0],B2_out[1],B2_out[2],B2_out[3],B2_out[4],B2_out[5],B2_out[6]};
@@ -424,10 +424,10 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                                 end
                                             end
                                         end
-                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //if(accum_psum_cycle < 21) accum_psum_cycle <= accum_psum_cycle + 7; else accum_psum_cycle <= 5'b0;
-                                        //if(accum_psum_cycle == 21) begin accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1;end
-                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        //if(accum_psum_cycle == 21) begin accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1;end
+                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+7) +: DATA_BITWIDTH*7] <= {B2_out[0],B2_out[1],B2_out[2],B2_out[3],B2_out[4],B2_out[5],B2_out[6]};
                                     end
                                     5'd6:
@@ -443,12 +443,12 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                         end
                                         else if(accum_psum_cycle == 24) begin
                                             if(delay[1]) begin
-                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; 
+                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; 
                                                 if(psum_rf_addr == {PSUM_RF_ADDR_BITWIDTH{1'b1}}) begin finish <= 1'b1; end
                                                 else begin psum_rf_addr <= psum_rf_addr + 1; end
                                             end
                                             else begin
-                                                accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1; 
+                                                accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1; 
                                                 if(flag) begin
                                                     $display($time,"accum_psum_flag is not updated by flag=1");
                                                     accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+6) +: DATA_BITWIDTH*6] <= {B2_out[0],B2_out[1],B2_out[2],B2_out[3],B2_out[4],B2_out[5]};
@@ -460,10 +460,10 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                                 end
                                             end
                                         end
-                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //if(accum_psum_cycle < 24) accum_psum_cycle <= accum_psum_cycle + 6; else accum_psum_cycle <= 5'b0;
-                                        //if(accum_psum_cycle == 24) begin accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1;end
-                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        //if(accum_psum_cycle == 24) begin accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1;end
+                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+6) +: DATA_BITWIDTH*6] <= {B2_out[0],B2_out[1],B2_out[2],B2_out[3],B2_out[4],B2_out[5]};
                                     end
                                     default:
@@ -486,10 +486,10 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                         end
                                         else if(accum_psum_cycle == 25) begin
                                             if(delay[1]) begin
-                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; finish <= 1'b1;
+                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; finish <= 1'b1;
                                             end
                                             else begin
-                                                accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1; 
+                                                accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1; 
                                                 if(flag) begin
                                                     $display($time,"accum_psum_flag is not updated by flag=1");
                                                     accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+5) +: DATA_BITWIDTH*5] <= {irrel3_2_out[0],irrel3_2_out[1],irrel3_2_out[2],irrel3_2_out[3],irrel3_2_out[4]};
@@ -501,10 +501,10 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                                 end
                                             end
                                         end
-                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //if(accum_psum_cycle < 25) accum_psum_cycle <= accum_psum_cycle + 5; else accum_psum_cycle <= 5'b0;
-                                        //if(accum_psum_cycle == 25) begin accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1;end
-                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        //if(accum_psum_cycle == 25) begin accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1;end
+                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+5) +: DATA_BITWIDTH*5] <= {irrel3_2_out[0],irrel3_2_out[1],irrel3_2_out[2],irrel3_2_out[3],irrel3_2_out[4]};
                                     end
                                     5'd4:
@@ -520,10 +520,10 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                         end
                                         else if(accum_psum_cycle == 28) begin
                                             if(delay[1]) begin
-                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; finish <= 1'b1;
+                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; finish <= 1'b1;
                                             end
                                             else begin
-                                                accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1; 
+                                                accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1; 
                                                 if(flag) begin
                                                     $display($time,"accum_psum_flag is not updated by flag=1");
                                                     accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+4) +: DATA_BITWIDTH*4] <= {irrel3_2_out[0],irrel3_2_out[1],irrel3_2_out[2],irrel3_2_out[3]};
@@ -535,10 +535,10 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                                 end
                                             end
                                         end
-                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //if(accum_psum_cycle < 28) accum_psum_cycle <= accum_psum_cycle + 4; else accum_psum_cycle <= 5'b0;
-                                        //if(accum_psum_cycle == 28) begin accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1;end
-                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        //if(accum_psum_cycle == 28) begin accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1;end
+                                        //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+4) +: DATA_BITWIDTH*4] <= {irrel3_2_out[0],irrel3_2_out[1],irrel3_2_out[2],irrel3_2_out[3]};
                                     end
                                     default: ;
@@ -560,10 +560,10 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                         end
                                         else if(accum_psum_cycle == 28) begin
                                             if(delay[1]) begin
-                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; finish <= 1'b1;
+                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; finish <= 1'b1;
                                             end
                                             else begin
-                                                accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1; 
+                                                accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1; 
                                                 if(flag) begin
                                                     $display($time,"accum_psum_flag is not updated by flag=1");
                                                     accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+4) +: DATA_BITWIDTH*4] <= {C2_out[0],C2_out[1],C2_out[2],C2_out[3]};
@@ -575,7 +575,7 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                                 end
                                             end
                                         end
-                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                     end
                                     5'd3:
                                     begin
@@ -590,10 +590,10 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                         end
                                         else if(accum_psum_cycle == 27) begin
                                             if(delay[1]) begin
-                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; finish <= 1'b1;
+                                                accum_psum_cycle <= 5'b0; accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; finish <= 1'b1;
                                             end
                                             else begin
-                                                accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1; 
+                                                accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1; 
                                                 if(flag) begin
                                                     $display($time,"accum_psum_flag is not updated by flag=1");
                                                     accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+3) +: DATA_BITWIDTH*3] <= {C2_out[0],C2_out[1],C2_out[2]};
@@ -605,10 +605,10 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                                                 end
                                             end
                                         end
-                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
+                                        else begin accum_psum_flag <= 1'b0; psum_gbf_w_en_out <= 1'b0; end
                                         //For one cycle write. (it cannot accumulate the psum on gbf)
                                         //if(accum_psum_cycle < 27) accum_psum_cycle <= accum_psum_cycle + 3; else accum_psum_cycle <= 5'b0;
-                                        //if(accum_psum_cycle == 27) begin accum_psum_flag <= 1'b1; psum_gbf_w_en <= 1'b1;end
+                                        //if(accum_psum_cycle == 27) begin accum_psum_flag <= 1'b1; psum_gbf_w_en_out <= 1'b1;end
                                         //else begin accum_psum_flag <= 1'b0; psum_gbf_w_en <= 1'b0; end
                                         //accum_psum[GBF_DATA_BITWIDTH-DATA_BITWIDTH*(accum_psum_cycle+3) +: DATA_BITWIDTH*3] <= {C2_out[0],C2_out[1],C2_out[2]};
                                     end

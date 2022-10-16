@@ -9,10 +9,10 @@
 // History: 2022.09.23 by Min-Gyu Park (alsrbok@snu.ac.kr)
 //------------------------------------------------------------+
 
-module rel_mem_accumulator #(parameter ROW                   = 16,
+module rel_mem_accumulator #(parameter ROW      = 16,
                 parameter COL                   = 16,
-                parameter DATA_BITWIDTH         = 16,
-                parameter GBF_DATA_BITWIDTH     = 512,
+                parameter DATA_BITWIDTH         = 16,   // DATA_BITWIDTH for PSUM
+                parameter GBF_DATA_BITWIDTH     = 512,  // DATA_BITWIDTH for PSUM_GBF
                 parameter PSUM_RF_ADDR_BITWIDTH    = 2,
                 parameter DEPTH                 = 32)
               ( input clk, reset, 
@@ -21,7 +21,7 @@ module rel_mem_accumulator #(parameter ROW                   = 16,
                 output reg [PSUM_RF_ADDR_BITWIDTH-1:0] psum_rf_addr,    //psum address whose data will be used in this module
                 output reg su_add_finish,
                 output reg [GBF_DATA_BITWIDTH-1:0] out_data,            //output data for psum_gbf
-                output reg psum_gbf_w_en,                               //write enable for psum_gbf
+                output reg psum_gbf_w_en_out,                           //write enable for psum_gbf
                 output [4:0] psum_gbf_w_addr,                           //write address for psum_gbf
                 output reg psum_gbf_w_num);                             //currently, write data to psum_gbf buf 1(0) / 2(1)
     /*META DATA*/
@@ -112,7 +112,7 @@ module rel_mem_accumulator #(parameter ROW                   = 16,
                     //su_util_cycle[0] <= 4'b0; su_util_cycle[1] <= 4'b0;
                     su_cycle <= 3'b0; finish <= 1'b0;
                     psum_rf_addr <= {PSUM_RF_ADDR_BITWIDTH{1'b0}}; psum_gbf_rel_cycle <= 5'b0; flag <= 1'b1;
-                    out_data <= {GBF_DATA_BITWIDTH{1'b0}}; psum_gbf_w_en <= 1'b0; delay[0] <= 1'b0; delay[1] <= 1'b0; last <= 1'b1;
+                    out_data <= {GBF_DATA_BITWIDTH{1'b0}}; psum_gbf_w_en_out <= 1'b0; delay[0] <= 1'b0; delay[1] <= 1'b0; last <= 1'b1;
                 end
                 S1:
                 begin
@@ -176,7 +176,7 @@ module rel_mem_accumulator #(parameter ROW                   = 16,
                                 out_data <= {GBF_DATA_BITWIDTH{1'bx}};
                         endcase
                         stop <= 1'b0;
-                        psum_gbf_w_en <= 1'b1;
+                        psum_gbf_w_en_out <= 1'b1;
                         if(delay[1]) begin
                             //$display("time: %d, su_cycle is updated from %d",$time,su_cycle);
                             su_cycle <= su_cycle + 1; delay[1] <= 1'b0;

@@ -8,9 +8,9 @@
 // History: 2022.08.09 by Min-Gyu Park (alsrbok@snu.ac.kr)
 //------------------------------------------------------------+
 
-module rf_iw_sync_dpdb #( parameter DATA_BITWIDTH = 16,
+module rf_iw_sync_dpdb #( parameter DATA_BITWIDTH = 8,
 			 parameter ADDR_BITWIDTH = 2,
-             parameter DEPTH = 4 ) //default register size is 16*4=64bits
+             parameter DEPTH = 4 ) //default register size is 8*4=32bits
 		   ( input clk,
 			 input reset,
 			 input write_sel,	// if write_sel == 1 : update mem1 from global buffer data && read data from mem2(which send to MAC) -> It will support by MUX signal

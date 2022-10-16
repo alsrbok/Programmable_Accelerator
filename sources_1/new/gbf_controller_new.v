@@ -13,7 +13,7 @@ module gbf_controller_new #(parameter ROW          = 16,   //PE array row size
                 parameter COL                           = 16,
                 parameter ACTV_ADDR_BITWIDTH            = 2,   //Decide rf_input memory size
                 parameter WGT_ADDR_BITWIDTH             = 2,
-                parameter GBF_DATA_BITWIDTH             = 512,  //Data Bitwidth/Bandwith for actv/wgt gbf
+                parameter GBF_DATA_BITWIDTH             = 256,  //Data Bitwidth/Bandwith for actv/wgt gbf
                 parameter GBF_ADDR_BITWIDTH             = 5,    //Addr Bitwidth for actv/wgt gbf
                 parameter GBF_DEPTH                     = 32 )  //Depth for actv/wgt gbf
           ( input clk, reset, finish,

@@ -11,7 +11,7 @@
 
 module pe_array_w_controller #(parameter ROW         = 16,   //PE array row size
             parameter COL                   = 16,   //PE array column size
-            parameter IN_BITWIDTH           = 16,   //For activation. weight, partial psum
+            parameter IN_BITWIDTH           = 8,   //For activation. weight, partial psum
             parameter OUT_BITWIDTH          = 16,   //For psum
             parameter ACTV_ADDR_BITWIDTH    = 2,   //Decide rf_input memory size
             parameter ACTV_DEPTH            = 4,    //ACTV_DEPTH = 2^(ACTV_ADDR_BITWIDTH)

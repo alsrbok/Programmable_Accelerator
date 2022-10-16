@@ -13,7 +13,7 @@
 module gbf_pe_array_su_adder_tb ();
     parameter ROW         = 16;
     parameter COL                   = 16;
-    parameter IN_BITWIDTH           = 16;
+    parameter IN_BITWIDTH           = 8;
     parameter OUT_BITWIDTH          = 16;
     parameter ACTV_ADDR_BITWIDTH    = 2;
     parameter ACTV_DEPTH            = 4;
@@ -21,7 +21,7 @@ module gbf_pe_array_su_adder_tb ();
     parameter WGT_DEPTH             = 4;
     parameter PSUM_ADDR_BITWIDTH    = 2;
     parameter PSUM_DEPTH            = 4;
-    parameter GBF_DATA_BITWIDTH     = 512;
+    parameter GBF_DATA_BITWIDTH     = 256;
     parameter GBF_ADDR_BITWIDTH     = 5;
     parameter GBF_DEPTH             = 32;
     parameter PSUM_GBF_DATA_BITWIDTH=512;

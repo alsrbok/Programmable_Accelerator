@@ -55,28 +55,28 @@ module simple_dp_ram #(parameter DATA_BITWIDTH    = 256,
 				.dina(dia), .doutb(dob)
 			);
         end
-        else if((DATA_BITWIDTH==512) && (DEPTH==32) && (MEM_INIT_FILE=="gbf_actv_buf1.mem"))begin : gen_gbf_actv_buf1
+        else if((DATA_BITWIDTH==256) && (DEPTH==32) && (MEM_INIT_FILE=="gbf_actv_buf1.mem"))begin : gen_gbf_actv_buf1
             gbf_actv_buf1 u_gbf_actv_buf1( 
 				.clka(~clk), .clkb(~clk), .ena(ena), .enb(enb), .wea(wea),
 				.addra(addra), .addrb(addrb),
 				.dina(dia), .doutb(dob)
 			);
         end
-        else if((DATA_BITWIDTH==512) && (DEPTH==32) && (MEM_INIT_FILE=="gbf_actv_buf2.mem"))begin : gen_gbf_actv_buf2
+        else if((DATA_BITWIDTH==256) && (DEPTH==32) && (MEM_INIT_FILE=="gbf_actv_buf2.mem"))begin : gen_gbf_actv_buf2
             gbf_actv_buf2 u_gbf_actv_buf2( 
 				.clka(~clk), .clkb(~clk), .ena(ena), .enb(enb), .wea(wea),
 				.addra(addra), .addrb(addrb),
 				.dina(dia), .doutb(dob)
 			);
         end
-        else if((DATA_BITWIDTH==512) && (DEPTH==32) && (MEM_INIT_FILE=="gbf_wgt_buf1.mem"))begin : gen_gbf_wgt_buf1
+        else if((DATA_BITWIDTH==256) && (DEPTH==32) && (MEM_INIT_FILE=="gbf_wgt_buf1.mem"))begin : gen_gbf_wgt_buf1
             gbf_wgt_buf1 u_gbf_wgt_buf1( 
 				.clka(~clk), .clkb(~clk), .ena(ena), .enb(enb), .wea(wea),
 				.addra(addra), .addrb(addrb),
 				.dina(dia), .doutb(dob)
 			);
         end
-        else if((DATA_BITWIDTH==512) && (DEPTH==32) && (MEM_INIT_FILE=="gbf_wgt_buf2.mem"))begin : gen_gbf_wgt_buf12
+        else if((DATA_BITWIDTH==256) && (DEPTH==32) && (MEM_INIT_FILE=="gbf_wgt_buf2.mem"))begin : gen_gbf_wgt_buf12
             gbf_wgt_buf2 u_gbf_wgt_buf2( 
 				.clka(~clk), .clkb(~clk), .ena(ena), .enb(enb), .wea(wea),
 				.addra(addra), .addrb(addrb),

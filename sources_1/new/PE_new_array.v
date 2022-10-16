@@ -9,7 +9,7 @@
 
 module PE_new_array #(parameter ROW         = 16,   //PE array row size
             parameter COL                   = 16,   //PE array column size
-            parameter IN_BITWIDTH           = 16,   //For activation. weight, partial psum
+            parameter IN_BITWIDTH           = 8,   //For activation. weight
             parameter OUT_BITWIDTH          = 16,   //For psum
             parameter ACTV_ADDR_BITWIDTH    = 2,   //Decide rf_input memory size
             parameter ACTV_DEPTH            = 4,    //ACTV_DEPTH = 2^(ACTV_ADDR_BITWIDTH)
@@ -17,7 +17,7 @@ module PE_new_array #(parameter ROW         = 16,   //PE array row size
             parameter WGT_DEPTH             = 4,
             parameter PSUM_ADDR_BITWIDTH    = 2,
             parameter PSUM_DEPTH            = 4,
-            parameter GBF_DATA_BITWIDTH         = 512)  //Data Bidwidth from gbf
+            parameter GBF_DATA_BITWIDTH     = 256)  //Data Bidwidth from actv,wgt gbf
           ( input clk,
             input reset, input [ROW*COL-1:0] MAC_en, //enalbe signal for MAC from control logic
             input actv_sel, input [ROW*COL-1:0] actv_en, input [ACTV_ADDR_BITWIDTH-1:0] actv_r_addr1, actv_r_addr2, input [ACTV_ADDR_BITWIDTH-1:0] actv_w_addr, input [GBF_DATA_BITWIDTH-1:0] actv_data, input [5*ROW*COL-1 : 0] actv_mux32_sel,

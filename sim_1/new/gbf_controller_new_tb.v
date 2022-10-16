@@ -15,7 +15,7 @@ module gbf_controller_new_tb();
     parameter COL                           = 16;
     parameter ACTV_ADDR_BITWIDTH            = 2;
     parameter WGT_ADDR_BITWIDTH             = 2;
-    parameter GBF_DATA_BITWIDTH             = 512;
+    parameter GBF_DATA_BITWIDTH             = 256;
     parameter GBF_ADDR_BITWIDTH             = 5;
     parameter GBF_DEPTH                     = 32;
     reg clk, reset, finish;

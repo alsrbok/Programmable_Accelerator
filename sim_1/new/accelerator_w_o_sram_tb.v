@@ -13,7 +13,7 @@
 module accelerator_w_o_sram_tb ();
     parameter ROW         = 16;
     parameter COL                   = 16;
-    parameter IN_BITWIDTH           = 16;
+    parameter IN_BITWIDTH           = 8;
     parameter OUT_BITWIDTH          = 16;
     parameter ACTV_ADDR_BITWIDTH    = 2;
     parameter ACTV_DEPTH            = 4;
@@ -21,7 +21,7 @@ module accelerator_w_o_sram_tb ();
     parameter WGT_DEPTH             = 4;
     parameter PSUM_ADDR_BITWIDTH    = 2;
     parameter PSUM_DEPTH            = 4;
-    parameter GBF_DATA_BITWIDTH     = 512;
+    parameter GBF_DATA_BITWIDTH     = 256;
     parameter GBF_ADDR_BITWIDTH     = 5;
     parameter GBF_DEPTH             = 32;
     parameter PSUM_GBF_DATA_BITWIDTH=512;
@@ -43,7 +43,7 @@ module accelerator_w_o_sram_tb ();
     .clk(clk), .reset(reset), .actv_en1a(actv_en1a), .actv_en2a(actv_en2a), .actv_we1a(actv_we1a), .actv_we2a(actv_we2a), .wgt_en1a(wgt_en1a), .wgt_en2a(wgt_en2a), .wgt_we1a(wgt_we1a), .wgt_we2a(wgt_we2a), 
     .actv_addr1a(actv_addr1a), .actv_addr2a(actv_addr2a), .wgt_addr1a(wgt_addr1a), .wgt_addr2a(wgt_addr2a), .actv_w_data1a(actv_w_data1a), .actv_w_data2a(actv_w_data2a), .wgt_w_data1a(wgt_w_data1a), .wgt_w_data2a(wgt_w_data2a), .finish(finish), .gbf_actv_data_avail(gbf_actv_data_avail), .gbf_wgt_data_avail(gbf_wgt_data_avail),
     .gbf_actv_buf1_ready(gbf_actv_buf1_ready), .gbf_actv_buf2_ready(gbf_actv_buf2_ready), .gbf_wgt_buf1_ready(gbf_wgt_buf1_ready), .gbf_wgt_buf2_ready(gbf_wgt_buf2_ready), .actv_gbf1_need_data(actv_gbf1_need_data), .actv_gbf2_need_data(actv_gbf2_need_data),
-    .wgt_gbf1_need_data(wgt_gbf1_need_data), .wgt_gbf2_need_data(wgt_gbf2_need_data), .r_data1b(r_data1b), .r_data2b(r_data2b), .r_en1b_out(r_en1b_out), .r_en2b_out(r_en1b_out));
+    .wgt_gbf1_need_data(wgt_gbf1_need_data), .wgt_gbf2_need_data(wgt_gbf2_need_data), .r_data1b(r_data1b), .r_data2b(r_data2b), .r_en1b_out(r_en1b_out), .r_en2b_out(r_en2b_out));
 
     always
         #5 clk = ~clk;
@@ -74,8 +74,6 @@ module accelerator_w_o_sram_tb ();
             $display($time, " [psum_gbf_wrapper] r_data2b_for_add : %h", u_accelerator_w_o_sram.u_psum_gbf_wrapper.r_data2b_for_add);
             $display($time, " [psum_gbf_wrapper] r_data2b_out : %h", u_accelerator_w_o_sram.u_psum_gbf_wrapper.r_data2b_out);
         end
-
-        
     end
 endmodule
 

@@ -7,7 +7,7 @@
 // History: 2022.08.15 by Min-Gyu Park (alsrbok@snu.ac.kr)
 //------------------------------------------------------------+
 
-module PE_new #(parameter IN_BITWIDTH       = 16,  //For activation. weight, partial psum
+module PE_new #(parameter IN_BITWIDTH       = 8,  //For activation. weight
             parameter OUT_BITWIDTH          = 16,  //For psum
             parameter ACTV_ADDR_BITWIDTH    = 2,   //Decide rf_input memory size
             parameter ACTV_DEPTH            = 4,   //ACTV_DEPTH = 2^(ACTV_ADDR_BITWIDTH)
@@ -25,7 +25,7 @@ module PE_new #(parameter IN_BITWIDTH       = 16,  //For activation. weight, par
 
     wire [IN_BITWIDTH-1:0] actv1, actv2, actv;
     wire [IN_BITWIDTH-1:0] wgt1, wgt2, wgt;
-    wire [IN_BITWIDTH-1:0] psum_in1, psum_in2, psum_in;
+    wire [OUT_BITWIDTH-1:0] psum_in1, psum_in2, psum_in;
     wire [OUT_BITWIDTH-1:0] psum1, psum2, psum;
     wire [PSUM_ADDR_BITWIDTH-1:0] w_addr, w_addr1, w_addr2;
     wire out_en;
@@ -49,7 +49,7 @@ module PE_new #(parameter IN_BITWIDTH       = 16,  //For activation. weight, par
      ) rf_psum(.clk(clk), .reset(reset), .en1(psum_en), .out_en(out_en), .addr1(psum_addr1), .w_data1(psum1), .w_addr1(w_addr1),
      .addr2(psum_addr2), .w_data2(psum2), .w_addr2(w_addr2), .addr_from_su_adder(addr_from_su_adder), .r_data1(psum_in1), .r_data2(psum_in2), .out1(psum_out1), .out2(psum_out2));
 
-    mux2 #(.WIDTH(IN_BITWIDTH)) psum_mux(.zero(psum_in2), .one(psum_in1), .sel(psum_en), .out(psum_in));
+    mux2 #(.WIDTH(OUT_BITWIDTH)) psum_mux(.zero(psum_in2), .one(psum_in1), .sel(psum_en), .out(psum_in));
     demux2 #(.WIDTH(OUT_BITWIDTH)) psum_demux(.d_in(psum), .sel(psum_en), .zero(psum2), .one(psum1));
     demux2 #(.WIDTH(PSUM_ADDR_BITWIDTH)) w_addr_demux(.d_in(w_addr), .sel(psum_en), .zero(w_addr2), .one(w_addr1));
 

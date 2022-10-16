@@ -8,12 +8,12 @@
 // History: 2022.08.15 by Min-Gyu Park (alsrbok@snu.ac.kr)
 //------------------------------------------------------------+
 
-module MAC_new #( parameter IN_BITWIDTH = 16,
+module MAC_new #( parameter IN_BITWIDTH = 8,
 			  parameter OUT_BITWIDTH = 16,
 			  parameter PSUM_ADDR_BITWIDTH = 2)
 			( input [IN_BITWIDTH-1 : 0] a_in,
 			  input [IN_BITWIDTH-1 : 0] w_in,
-			  input [IN_BITWIDTH-1 : 0] sum_in,
+			  input [OUT_BITWIDTH-1 : 0] sum_in,
 			  input [PSUM_ADDR_BITWIDTH-1 : 0] psum_write_addr, // write address of psum for current a_in, w_in (get from control logic)
 			  input en, clk,						//en : control logic give signal to calculate
 			  output reg [PSUM_ADDR_BITWIDTH-1 : 0] write_addr, //write address of psum for current a_in, w_in (send to rf_psum)

@@ -16,7 +16,7 @@ module psum_gbf_wrapper #(parameter ROW         = 16,           //PE array row s
             parameter PSUM_GBF_DATA_BITWIDTH     = 512,
             parameter PSUM_GBF_ADDR_BITWIDTH     = 5,       //Addr Bitwidth for psum gbf
             parameter PSUM_GBF_DEPTH             = 32 )     //Depth for psum gbf :default = 2kB
-        (   input clk, reset,
+        (   input clk,
             input [PSUM_GBF_DATA_BITWIDTH-1:0] out_data,                         //output data from su_adder
             input psum_gbf_w_en,                                            //write enable from su_adder
             input [PSUM_GBF_ADDR_BITWIDTH-1:0] psum_gbf_w_addr,             //write address from su_adder
@@ -54,6 +54,8 @@ module psum_gbf_wrapper #(parameter ROW         = 16,           //PE array row s
     ) u_psum_gbf_db(.clk(clk), .en1a(en_we_1a), .en1b(r_en1b), .we1a(en_we_1a), .en2a(en_we_2a), .en2b(r_en2b), .we2a(en_we_2a), .addr1a(w_addr1a), .addr1b(r_addr1b),
     .addr2a(w_addr2a), .addr2b(r_addr2b), .w_data1a(accum_data1a), .w_data2a(accum_data2a), .r_data1b(r_data1b_from_gbf), .r_data2b(r_data2b_from_gbf));
 
-    assign r_en1b_out = r_en1b;
-    assign r_en2b_out = r_en2b;
+    mux2 #(.WIDTH(1)) r_en1b_mx(.zero(0), .one(r_en1b), .sel(psum_gbf_w_num), .out(r_en1b_out));
+    mux2 #(.WIDTH(1)) r_en2b_mx(.zero(r_en2b), .one(0), .sel(psum_gbf_w_num), .out(r_en2b_out));
+    //assign r_en1b_out = psum_gbf_w_num ? 0 : r_en1b;
+    //assign r_en2b_out = psum_gbf_w_num ? r_en2b : 0;
 endmodule

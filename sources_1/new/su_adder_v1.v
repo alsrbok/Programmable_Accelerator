@@ -23,7 +23,7 @@ module su_adder_v1 #(parameter ROW                   = 16,
                 output reg [PSUM_RF_ADDR_BITWIDTH-1:0] psum_rf_addr,    //psum address whose data will be used in this module (output for gbf_pe_array)
                 output reg su_add_finish,                               //output for gbf_pe_array
                 output reg [GBF_DATA_BITWIDTH-1:0] out_data,                //output data for psum_gbf
-                output reg psum_gbf_w_en,                               //write enable for psum_gbf
+                output reg psum_gbf_w_en_out,                               //write enable for psum_gbf
                 output [4:0] psum_gbf_w_addr,                           //write address for psum_gbf
                 output reg psum_gbf_w_num);                             //currently, write data to psum_gbf buf 1(0) / 2(1)
 
@@ -150,15 +150,15 @@ module su_adder_v1 #(parameter ROW                   = 16,
     always @(negedge clk, posedge reset) begin
         if(reset) begin
             psum_gbf_irrel_cycle <= 8'b0; psum_gbf_rel_cycle <= 5'b0;
-            psum_gbf_w_en <= 1'b0; psum_gbf_w_num <= 1'b0; flag <= 1'b1;
+            psum_gbf_w_en_out <= 1'b0; psum_gbf_w_num <= 1'b0; flag <= 1'b1;
         end
         else begin
             case(nxt_state)
                 IDLE:
                 begin
-                    su_cycle <= 3'b0; finish <= 1'b0;
+                    su_cycle <= 3'b0; finish <= 1'b0; psum_gbf_w_num <= psum_gbf_w_num;
                     psum_rf_addr <= {PSUM_RF_ADDR_BITWIDTH{1'b0}}; out_data <= {GBF_DATA_BITWIDTH{1'b0}};
-                    A_adder_mode_cycle <= 2'b00; A_addr_en <= 1'b1; psum_gbf_w_en <= 1'b0;
+                    A_adder_mode_cycle <= 2'b00; A_addr_en <= 1'b1; psum_gbf_w_en_out <= 1'b0;
                     for(idx=0; idx<3; idx=idx+1) begin
                         delay[idx] <= 1'b0;
                     end
@@ -199,6 +199,7 @@ module su_adder_v1 #(parameter ROW                   = 16,
                         end
                         //output for psum_gbf
                         if(psum_gbf_rel_cycle < psum_gbf_num[1]) begin
+                            psum_gbf_w_num <= psum_gbf_w_num;
                             if(delay[1]) begin
                                 $display($time,"rel_cycle is updated");
                                 psum_gbf_rel_cycle <= psum_gbf_rel_cycle + 1; delay[1] <= 1'b0;
@@ -321,7 +322,7 @@ module su_adder_v1 #(parameter ROW                   = 16,
                         endcase
                         if(su_cycle < max_su_cycle) begin
                             stop <= 1'b0;
-                            psum_gbf_w_en <= 1'b1;
+                            psum_gbf_w_en_out <= 1'b1;
                             if(delay[2]) begin
                                 su_cycle <= su_cycle + 1; delay[2] <= 1'b0;
                             end
@@ -331,7 +332,7 @@ module su_adder_v1 #(parameter ROW                   = 16,
                         end
                         else begin
                             stop <= 1'b1;
-                            psum_gbf_w_en <= 1'b0;
+                            psum_gbf_w_en_out <= 1'b0;
                             su_cycle <= 3'b0;
                             if(psum_rf_addr < {PSUM_RF_ADDR_BITWIDTH{1'b1}}) begin
                                 psum_rf_addr <= psum_rf_addr + 1;
