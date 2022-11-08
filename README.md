@@ -6,7 +6,8 @@ Detail will be upload after uploading the thesis on arxiv.
 
 <img width="646" alt="image" src="https://user-images.githubusercontent.com/43400865/200553158-57dac871-3924-4cd2-9af5-cd692210b8e0.png">
 
-<img width="676" alt="image" src="https://user-images.githubusercontent.com/43400865/200553383-1c3c612f-9c89-4249-9930-f777b411db8d.png">
+<img width="688" alt="스크린샷 2022-11-08 오후 8 42 10" src="https://user-images.githubusercontent.com/43400865/200555350-5a58d679-4611-497f-9a94-0df6d074accf.png">
+
 
 <img width="684" alt="image" src="https://user-images.githubusercontent.com/43400865/200554062-b7c269ec-e781-4f02-8b2f-047f5d62b400.png">
 
