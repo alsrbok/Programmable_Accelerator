@@ -10,7 +10,7 @@
 // History: 2022.10.01 by Min-Gyu Park (alsrbok@snu.ac.kr)
 //------------------------------------------------------------+
 `timescale 1ns / 1ps
-
+(* DONT_TOUCH = "true" *) 
 module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
                 parameter COL                   = 16,
                 parameter DATA_BITWIDTH         = 16,
@@ -85,7 +85,7 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
 
     reg [1:0] cur_state, nxt_state;
 
-    always @(negedge clk or posedge reset) begin
+    always @(negedge clk) begin
         if(reset) begin
             cur_state <= IDLE;
         end
@@ -137,7 +137,7 @@ module su_adder_for_ambi_irrel #(parameter ROW                   = 16,
     reg delay[0:1];
     reg stop, flag;
 
-    always @(negedge clk, posedge reset) begin
+    always @(negedge clk) begin
         if(reset) begin
             psum_gbf_irrel_cycle <= 8'b0; psum_gbf_rel_cycle <= 5'b0;
             // when accum_psum become full(accum_psum_flag == 1'b1), enable the psum_gbf_w_en_out to send 512bits data to psum_gbf

@@ -90,7 +90,7 @@ module gbf_pe_array_tb();
         $display($time, " [gbf_controller] actv_rf_num : %h", u_gbf_pe_array.u_gbf_controller_new.actv_rf_num);
         $display($time, " [pe_array] wire_actv_rf1_need_data : %h", u_gbf_pe_array.wire_actv_rf1_need_data);
         $display($time, " [pe_array] wire_actv_rf2_need_data : %h", u_gbf_pe_array.wire_actv_rf2_need_data);*/
-
+        
         for(i=0; i<300; i=i+1) begin
             #5
             $display($time, " [gbf_controller] wgt_en1b : %h", u_gbf_pe_array.wire_wgt_en1b);

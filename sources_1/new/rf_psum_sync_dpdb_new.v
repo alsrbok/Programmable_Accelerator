@@ -10,7 +10,7 @@
 
 module rf_psum_sync_dpdb_new #( parameter DATA_BITWIDTH = 16,
 			 parameter ADDR_BITWIDTH = 2,
-             parameter DEPTH = 4 ) //default register size is 16*4=561bits
+             parameter DEPTH = 4 ) //default register size is 16*4=64bits
 		   ( input clk,
 			 input reset,
 			 input en1,				// en1 : control logic gives en1 signal = use buffer1 to communicate with MAC (buffer2 communicate with upper hierarchy mem or not(maybe need more signal))
@@ -34,7 +34,7 @@ module rf_psum_sync_dpdb_new #( parameter DATA_BITWIDTH = 16,
 
     integer i;
 
-	always@(posedge clk ,posedge reset) 
+	always@(posedge clk) 
 		begin : BUFFER1
 			if(reset) begin
                 out1 <= 0;
@@ -63,7 +63,7 @@ module rf_psum_sync_dpdb_new #( parameter DATA_BITWIDTH = 16,
 			end
 		end
 	
-	always@(posedge clk or posedge reset)
+	always@(posedge clk)
 		begin : BUFFER2
 			if(reset) begin
                 out2 <= 0;

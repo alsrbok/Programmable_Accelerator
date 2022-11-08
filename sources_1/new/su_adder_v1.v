@@ -9,7 +9,7 @@
 // History: 2022.09.27 by Min-Gyu Park (alsrbok@snu.ac.kr)
 //------------------------------------------------------------+
 `timescale 1ns / 1ps
-
+(* DONT_TOUCH = "true" *) 
 module su_adder_v1 #(parameter ROW                   = 16,
                 parameter COL                   = 16,
                 parameter DATA_BITWIDTH         = 16,
@@ -100,7 +100,7 @@ module su_adder_v1 #(parameter ROW                   = 16,
 
     reg [1:0] cur_state, nxt_state;
 
-    always @(negedge clk or posedge reset) begin
+    always @(negedge clk) begin
         if(reset) begin
             cur_state <= IDLE;
         end
@@ -147,7 +147,7 @@ module su_adder_v1 #(parameter ROW                   = 16,
 
     reg delay[0:2];
     reg stop, flag;
-    always @(negedge clk, posedge reset) begin
+    always @(negedge clk) begin
         if(reset) begin
             psum_gbf_irrel_cycle <= 8'b0; psum_gbf_rel_cycle <= 5'b0;
             psum_gbf_w_en_out <= 1'b0; psum_gbf_w_num <= 1'b0; flag <= 1'b1;

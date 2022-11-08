@@ -8,7 +8,7 @@
 //  
 // History: 2022.09.23 by Min-Gyu Park (alsrbok@snu.ac.kr)
 //------------------------------------------------------------+
-
+(* DONT_TOUCH = "true" *) 
 module rel_mem_accumulator #(parameter ROW      = 16,
                 parameter COL                   = 16,
                 parameter DATA_BITWIDTH         = 16,   // DATA_BITWIDTH for PSUM
@@ -53,7 +53,7 @@ module rel_mem_accumulator #(parameter ROW      = 16,
 
     reg [1:0] cur_state, nxt_state;
 
-    always @(negedge clk or posedge reset) begin
+    always @(negedge clk) begin
         if(reset) begin
             cur_state <= IDLE;
             //nxt_state <= IDLE;
@@ -101,7 +101,7 @@ module rel_mem_accumulator #(parameter ROW      = 16,
     reg delay[0:1];
     reg stop, flag, last;
 
-    always @(negedge clk, posedge reset) begin
+    always @(negedge clk) begin
         if(reset) begin
             psum_gbf_irrel_cycle <= 8'b0; psum_gbf_rel_cycle <= 5'b0; psum_gbf_w_num <= 1'b0;
         end

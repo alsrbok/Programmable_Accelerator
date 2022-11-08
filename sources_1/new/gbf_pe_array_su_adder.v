@@ -43,8 +43,10 @@ module gbf_pe_array_su_adder #(parameter ROW         = 16,   //PE array row size
             output psum_gbf_r_en,                                           //read enable for psum_gbf
             output [PSUM_GBF_ADDR_BITWIDTH-1:0] psum_gbf_r_addr,            //read address for psum_gbf
             output psum_gbf_w_en_for_init,                                  //write enable in order to initialize the psum
-            output [PSUM_GBF_ADDR_BITWIDTH-1:0] psum_gbf_w_addr_for_init);  //write address in order to initialize the psum
-    
+            output [PSUM_GBF_ADDR_BITWIDTH-1:0] psum_gbf_w_addr_for_init    //write address in order to initialize the psum
+            //output r0_psum_gbf_w_num, r1_psum_gbf_w_num, r2_psum_gbf_w_num
+            );
+
     wire w_su_add_finish;
     wire [PSUM_ADDR_BITWIDTH-1:0] w_addr_from_su_adder;
     wire w_pe_psum_finish, w_conv_finish, w_turn_off;
@@ -59,6 +61,7 @@ module gbf_pe_array_su_adder #(parameter ROW         = 16,   //PE array row size
     su_adder #(.ROW(ROW), .COL(COL), .DATA_BITWIDTH(OUT_BITWIDTH), .GBF_DATA_BITWIDTH(PSUM_GBF_DATA_BITWIDTH), .PSUM_RF_ADDR_BITWIDTH(PSUM_ADDR_BITWIDTH),
     .DEPTH(PSUM_GBF_DEPTH)) u_su_adder(.clk(clk), .reset(reset), .psum_out(w_psum_out), .pe_psum_finish(w_pe_psum_finish), .conv_finish(w_conv_finish),
     .psum_rf_addr(w_addr_from_su_adder), .su_add_finish(w_su_add_finish), .out_data(out_data), .psum_gbf_w_en(psum_gbf_w_en), .psum_gbf_w_addr(psum_gbf_w_addr), .psum_gbf_w_num(psum_gbf_w_num),
-    .psum_gbf_r_en(psum_gbf_r_en), .psum_gbf_r_addr(psum_gbf_r_addr), .psum_gbf_w_en_for_init(psum_gbf_w_en_for_init), .psum_gbf_w_addr_for_init(psum_gbf_w_addr_for_init));
+    .psum_gbf_r_en(psum_gbf_r_en), .psum_gbf_r_addr(psum_gbf_r_addr), .psum_gbf_w_en_for_init(psum_gbf_w_en_for_init), .psum_gbf_w_addr_for_init(psum_gbf_w_addr_for_init)
+    /*.r0_psum_gbf_w_num(r0_psum_gbf_w_num), .r1_psum_gbf_w_num(r1_psum_gbf_w_num), .r2_psum_gbf_w_num(r2_psum_gbf_w_num)*/);
 
 endmodule

@@ -96,7 +96,7 @@ module pe_array_controller #(parameter ROW         = 16,   //PE array row size
     reg [3:0] cur_state, nxt_state;
     */
     // transition of state
-    always @(negedge clk or posedge reset) begin
+    always @(negedge clk) begin
         if(reset) begin
             cur_state <= IDLE;
             //nxt_state <= IDLE;

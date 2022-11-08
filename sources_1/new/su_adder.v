@@ -29,8 +29,9 @@ module su_adder #(parameter ROW                   = 16,
                 output reg psum_gbf_r_en,                               //read enable for psum_gbf
                 output reg [4:0] psum_gbf_r_addr,                        //read address for psum_gbf
                 output reg psum_gbf_w_en_for_init,                      //write enable in order to initialize the psum
-                output reg [4:0] psum_gbf_w_addr_for_init);                //write address in order to initialize the psum
-    
+                output reg [4:0] psum_gbf_w_addr_for_init               //write address in order to initialize the psum
+                //output reg r0_psum_gbf_w_num, r1_psum_gbf_w_num, r2_psum_gbf_w_num
+                );
     /*META-DATA*/
     reg [1:0] mode[0:1];            //mode 0: use rel_mem_accumulator, mode 1: use su_adder_v1, mode 2: use su_adder_for_ambi_irrel, dummy [1]
     reg [4:0] irrel_rel_num[0:1];   // [0]: irrel_num, [1]: rel_num
@@ -70,15 +71,15 @@ module su_adder #(parameter ROW                   = 16,
     wire [GBF_ADDR_BITWIDTH-1:0] w0_psum_gbf_w_addr, w1_psum_gbf_w_addr, w2_psum_gbf_w_addr;
     wire w0_psum_gbf_w_num, w1_psum_gbf_w_num, w2_psum_gbf_w_num;
 
-    rel_mem_accumulator #(.ROW(ROW), .COL(COL), .DATA_BITWIDTH(DATA_BITWIDTH), .GBF_DATA_BITWIDTH(GBF_DATA_BITWIDTH), .PSUM_RF_ADDR_BITWIDTH(PSUM_RF_ADDR_BITWIDTH),
+    (* DONT_TOUCH = "true" *) rel_mem_accumulator #(.ROW(ROW), .COL(COL), .DATA_BITWIDTH(DATA_BITWIDTH), .GBF_DATA_BITWIDTH(GBF_DATA_BITWIDTH), .PSUM_RF_ADDR_BITWIDTH(PSUM_RF_ADDR_BITWIDTH),
     .DEPTH(DEPTH)) u_rel_mem_accumulator(.clk(w0_clk), .reset(w0_reset), .psum_out(w0_psum_out), .pe_psum_finish(w0_pe_psum_finish), .conv_finish(w0_conv_finish),
     .psum_rf_addr(w0_psum_rf_addr), .su_add_finish(w0_su_add_finish), .out_data(w0_out_data), .psum_gbf_w_en_out(w0_psum_gbf_w_en), .psum_gbf_w_addr(w0_psum_gbf_w_addr), .psum_gbf_w_num(w0_psum_gbf_w_num));
 
-    su_adder_v1 #(.ROW(ROW), .COL(COL), .DATA_BITWIDTH(DATA_BITWIDTH), .GBF_DATA_BITWIDTH(GBF_DATA_BITWIDTH), .PSUM_RF_ADDR_BITWIDTH(PSUM_RF_ADDR_BITWIDTH),
+    (* DONT_TOUCH = "true" *) su_adder_v1 #(.ROW(ROW), .COL(COL), .DATA_BITWIDTH(DATA_BITWIDTH), .GBF_DATA_BITWIDTH(GBF_DATA_BITWIDTH), .PSUM_RF_ADDR_BITWIDTH(PSUM_RF_ADDR_BITWIDTH),
     .DEPTH(DEPTH)) u_su_adder_v1(.clk(w1_clk), .reset(w1_reset), .psum_out(w1_psum_out), .pe_psum_finish(w1_pe_psum_finish), .conv_finish(w1_conv_finish), .irrel_num(irrel_rel_num[0]),
     .psum_rf_addr(w1_psum_rf_addr), .su_add_finish(w1_su_add_finish), .out_data(w1_out_data), .psum_gbf_w_en_out(w1_psum_gbf_w_en), .psum_gbf_w_addr(w1_psum_gbf_w_addr), .psum_gbf_w_num(w1_psum_gbf_w_num));
 
-    su_adder_for_ambi_irrel #(.ROW(ROW), .COL(COL), .DATA_BITWIDTH(DATA_BITWIDTH), .GBF_DATA_BITWIDTH(GBF_DATA_BITWIDTH), .PSUM_RF_ADDR_BITWIDTH(PSUM_RF_ADDR_BITWIDTH),
+    (* DONT_TOUCH = "true" *) su_adder_for_ambi_irrel #(.ROW(ROW), .COL(COL), .DATA_BITWIDTH(DATA_BITWIDTH), .GBF_DATA_BITWIDTH(GBF_DATA_BITWIDTH), .PSUM_RF_ADDR_BITWIDTH(PSUM_RF_ADDR_BITWIDTH),
     .DEPTH(DEPTH)) u_su_adder_for_ambi_irrel(.clk(w2_clk), .reset(w2_reset), .psum_out(w2_psum_out), .pe_psum_finish(w2_pe_psum_finish), .conv_finish(w2_conv_finish), .irrel_num(irrel_rel_num[0]), .rel_num(irrel_rel_num[1]),
     .psum_rf_addr(w2_psum_rf_addr), .su_add_finish(w2_su_add_finish), .out_data(w2_out_data), .psum_gbf_w_en_out(w2_psum_gbf_w_en), .psum_gbf_w_addr(w2_psum_gbf_w_addr), .psum_gbf_w_num(w2_psum_gbf_w_num));
 
@@ -96,7 +97,7 @@ module su_adder #(parameter ROW                   = 16,
     reg [1:0] cur_state, nxt_state;
     reg finish;
 
-    always @(negedge clk or posedge reset) begin
+    always @(negedge clk) begin
         if(reset) begin
             cur_state <= IDLE;
         end
@@ -110,7 +111,7 @@ module su_adder #(parameter ROW                   = 16,
     
     reg [1:0] w_xor_psum_gbf_w_num_delay;
 
-    always@(posedge clk, posedge reset) begin
+    always@(posedge clk) begin
         if(reset) begin
             w_xor_psum_gbf_w_num_delay <= 2'b11;
         end
@@ -119,7 +120,7 @@ module su_adder #(parameter ROW                   = 16,
         end
     end
     
-    always @(negedge clk, posedge reset) begin
+    always @(negedge clk) begin
         if(reset) begin
             r_psum_gbf_w_num <= 1'b0;
         end
@@ -169,7 +170,7 @@ module su_adder #(parameter ROW                   = 16,
     end
 
     reg delay, flag;
-    always @(negedge clk, posedge reset) begin
+    always @(negedge clk) begin
         if(reset) begin
             psum_gbf_r_en <= 1'b0; psum_gbf_r_addr <= 5'b0;
             psum_gbf_w_en_for_init <= 1'b0; psum_gbf_w_addr_for_init <= 5'b0;

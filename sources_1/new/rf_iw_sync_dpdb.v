@@ -28,7 +28,7 @@ module rf_iw_sync_dpdb #( parameter DATA_BITWIDTH = 8,
 
     integer i;
 
-	always@(posedge clk or posedge reset)
+	always@(posedge clk)
 		begin : BUFFER1
 			if(reset) begin
                 r_data1 <= 0;
@@ -44,7 +44,7 @@ module rf_iw_sync_dpdb #( parameter DATA_BITWIDTH = 8,
 			end
 		end
     
-	always@(posedge clk or posedge reset)
+	always@(posedge clk)
 		begin : BUFFER2
 			if(reset) begin
                 r_data2 <= 0;

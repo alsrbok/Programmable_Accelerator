@@ -29,10 +29,60 @@ module PE_new_array #(parameter ROW         = 16,   //PE array row size
     wire [OUT_BITWIDTH*ROW*COL-1:0] wire_psum1, wire_psum2;
     wire [IN_BITWIDTH*ROW*COL-1:0] wire_actv_data;
     wire [IN_BITWIDTH*ROW*COL-1:0] wire_wgt_data;
+    /*
+    //for pipelined reg
+    reg [ROW*COL-1:0] actv_en_reg, wgt_en_reg;
+    reg [GBF_DATA_BITWIDTH-1:0] actv_data_reg, wgt_data_reg;
+    reg [5*ROW*COL-1 : 0] actv_mux32_sel_reg, wgt_mux32_sel_reg;
+    reg [ACTV_ADDR_BITWIDTH-1:0] actv_w_addr_reg;
+    reg [WGT_ADDR_BITWIDTH-1:0] wgt_w_addr_reg;
+    reg [ROW*COL-1:0] MAC_en_reg;
+    reg actv_sel_reg; reg [ACTV_ADDR_BITWIDTH-1:0] actv_r_addr1_reg, actv_r_addr2_reg;
+    reg wgt_sel_reg; reg [WGT_ADDR_BITWIDTH-1:0] wgt_r_addr1_reg, wgt_r_addr2_reg;
+    reg psum_en_reg; reg [PSUM_ADDR_BITWIDTH-1:0] psum_addr1_reg, psum_addr2_reg, psum_write_addr_reg;
+    
+    
+    always @(negedge clk) begin
+      actv_en_reg <= actv_en; wgt_en_reg <= wgt_en;
+      actv_data_reg <= actv_data; wgt_data_reg <= wgt_data;
+      actv_mux32_sel_reg <= actv_mux32_sel; wgt_mux32_sel_reg <= wgt_mux32_sel;
+      actv_w_addr_reg <= actv_w_addr; wgt_w_addr_reg <= wgt_w_addr;
+      //
+      MAC_en_reg <= MAC_en;
+      actv_sel_reg <= actv_sel; actv_r_addr1_reg <= actv_r_addr1; actv_r_addr2_reg <= actv_r_addr2;
+      wgt_sel_reg <= wgt_sel; wgt_r_addr1_reg <= wgt_r_addr1; wgt_r_addr2_reg <= wgt_r_addr2;
+      psum_en_reg <= psum_en; psum_addr1_reg <= psum_addr1; psum_addr2_reg <= psum_addr2; psum_write_addr_reg <= psum_write_addr;
+    end
 
+    genvar i,j;
+    generate
+        for(i=0; i<ROW; i=i+1) begin : Row
+            for(j=0; j<COL; j=j+1) begin : Col
+
+                mux32 #(.WIDTH(IN_BITWIDTH)) wgt_mux(.in(wgt_data_reg), .sel(wgt_mux32_sel_reg[5*(COL*i+j+1)-1 : 5*(COL*i+j)]), .out(wire_wgt_data[IN_BITWIDTH*(COL*i+j+1)-1 : IN_BITWIDTH*(COL*i+j)]));
+                mux32 #(.WIDTH(IN_BITWIDTH)) actv_mux(.in(actv_data_reg), .sel(actv_mux32_sel_reg[5*(COL*i+j+1)-1 : 5*(COL*i+j)]), .out(wire_actv_data[IN_BITWIDTH*(COL*i+j+1)-1 : IN_BITWIDTH*(COL*i+j)]));
+
+                PE_new #(.IN_BITWIDTH(IN_BITWIDTH), .OUT_BITWIDTH(OUT_BITWIDTH), .ACTV_ADDR_BITWIDTH(ACTV_ADDR_BITWIDTH), .ACTV_DEPTH(ACTV_DEPTH), .WGT_ADDR_BITWIDTH(WGT_ADDR_BITWIDTH), .WGT_DEPTH(WGT_DEPTH), 
+                .PSUM_ADDR_BITWIDTH(PSUM_ADDR_BITWIDTH), .PSUM_DEPTH(PSUM_DEPTH)) pe_new(.clk(clk), .reset(reset), .MAC_en(MAC_en_reg[COL*i+j]), .actv_sel(actv_sel_reg), .actv_en(actv_en_reg[COL*i+j]), .wgt_sel(wgt_sel_reg), .wgt_en(wgt_en_reg[COL*i+j]), .psum_en(psum_en_reg),
+                .actv_r_addr1(actv_r_addr1_reg), .actv_w_addr1(actv_w_addr_reg),
+                .actv_r_addr2(actv_r_addr2_reg), .actv_w_addr2(actv_w_addr_reg), 
+                .actv_data1(wire_actv_data[IN_BITWIDTH*(COL*i+j+1)-1 : IN_BITWIDTH*(COL*i+j)]), .actv_data2(wire_actv_data[IN_BITWIDTH*(COL*i+j+1)-1 : IN_BITWIDTH*(COL*i+j)]),
+                .wgt_r_addr1(wgt_r_addr1_reg), .wgt_w_addr1(wgt_w_addr_reg),
+                .wgt_r_addr2(wgt_r_addr2_reg), .wgt_w_addr2(wgt_w_addr_reg),
+                .wgt_data1(wire_wgt_data[IN_BITWIDTH*(COL*i+j+1)-1 : IN_BITWIDTH*(COL*i+j)]), .wgt_data2(wire_wgt_data[IN_BITWIDTH*(COL*i+j+1)-1 : IN_BITWIDTH*(COL*i+j)]),
+                .psum_addr1(psum_addr1_reg), .psum_addr2(psum_addr2_reg), .psum_write_addr(psum_write_addr_reg), .addr_from_su_adder(addr_from_su_adder),
+                .psum_out1(wire_psum1[OUT_BITWIDTH*(COL*(ROW-i)-j)-1 : OUT_BITWIDTH*(COL*(ROW-i)-j-1)]), .psum_out2(wire_psum2[OUT_BITWIDTH*(COL*(ROW-i)-j)-1 : OUT_BITWIDTH*(COL*(ROW-i)-j-1)])
+                );
+
+                mux2 #(.WIDTH(OUT_BITWIDTH)) mux(.zero(wire_psum1[OUT_BITWIDTH*(COL*(ROW-i)-j)-1 : OUT_BITWIDTH*(COL*(ROW-i)-j-1)]), .one(wire_psum2[OUT_BITWIDTH*(COL*(ROW-i)-j)-1 : OUT_BITWIDTH*(COL*(ROW-i)-j-1)]), 
+                .sel(psum_en), .out(psum_out[OUT_BITWIDTH*(COL*(ROW-i)-j)-1 : OUT_BITWIDTH*(COL*(ROW-i)-j-1)])
+            end
+        end
+    endgenerate
+    */
+    //without pipelined reg
     
     genvar i,j;
-
     generate
         for(i=0; i<ROW; i=i+1) begin : Row
             for(j=0; j<COL; j=j+1) begin : Col
@@ -58,6 +108,7 @@ module PE_new_array #(parameter ROW         = 16,   //PE array row size
             end
         end
     endgenerate
+    
 
 
 endmodule

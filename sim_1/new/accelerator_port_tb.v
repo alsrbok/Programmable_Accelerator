@@ -32,11 +32,13 @@ module accelerator_port_tb ();
     wire actv_gbf1_need_data, actv_gbf2_need_data, wgt_gbf1_need_data, wgt_gbf2_need_data;
     wire [PSUM_GBF_DATA_BITWIDTH/4-1:0] reduced_r_data1b, reduced_r_data2b;
     wire r_en1b_out, r_en2b_out;
+    wire [31:0] initial_data1b;
+    wire [31:0] initial_data2b;
 
     accelerator_port #(.ROW(ROW), .COL(COL), .IN_BITWIDTH(IN_BITWIDTH), .OUT_BITWIDTH(OUT_BITWIDTH), .ACTV_ADDR_BITWIDTH(ACTV_ADDR_BITWIDTH), .ACTV_DEPTH(ACTV_DEPTH), .WGT_ADDR_BITWIDTH(WGT_ADDR_BITWIDTH), .WGT_DEPTH(WGT_DEPTH), .PSUM_ADDR_BITWIDTH(PSUM_ADDR_BITWIDTH), .PSUM_DEPTH(PSUM_DEPTH),
     .GBF_DATA_BITWIDTH(GBF_DATA_BITWIDTH), .GBF_ADDR_BITWIDTH(GBF_ADDR_BITWIDTH), .GBF_DEPTH(GBF_DEPTH), .PSUM_GBF_DATA_BITWIDTH(PSUM_GBF_DATA_BITWIDTH), .PSUM_GBF_ADDR_BITWIDTH(PSUM_GBF_ADDR_BITWIDTH), .PSUM_GBF_DEPTH(PSUM_GBF_DEPTH)) 
     u_accelerator_port(.clk(clk), .reset(reset), .actv_gbf1_need_data(actv_gbf1_need_data), .actv_gbf2_need_data(actv_gbf2_need_data), .wgt_gbf1_need_data(wgt_gbf1_need_data), .wgt_gbf2_need_data(wgt_gbf2_need_data), 
-    .reduced_r_data1b(reduced_r_data1b), .reduced_r_data2b(reduced_r_data2b), .r_en1b_out(r_en1b_out), .r_en2b_out(r_en2b_out));
+    .reduced_r_data1b(reduced_r_data1b), .reduced_r_data2b(reduced_r_data2b), .r_en1b_out(r_en1b_out), .r_en2b_out(r_en2b_out), .initial_data1b(initial_data1b), .initial_data2b(initial_data2b));
 
     always
         #5 clk = ~clk;
@@ -49,7 +51,7 @@ module accelerator_port_tb ();
         reset = 0;
 
         #10 reset = 1;
-        #10 reset = 0;
+        #20 reset = 0;
 
     end
 endmodule
