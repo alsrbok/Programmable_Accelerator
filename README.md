@@ -1,7 +1,7 @@
 # Programmable_Accelerator
 It can support any spatial/temporal mapping of DNN computation. (FPGA Prototype, using zc706)
 
-Detail will be upload after uploading the thesis on arxiv.
+Detail will be explained after uploading the thesis on arxiv.
 
 
 <img width="646" alt="image" src="https://user-images.githubusercontent.com/43400865/200553158-57dac871-3924-4cd2-9af5-cd692210b8e0.png">
